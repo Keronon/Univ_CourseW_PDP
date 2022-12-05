@@ -33,6 +33,8 @@ namespace Email_Service
         public FORM_Main()
         {
             InitializeComponent();
+
+
         }
 
         private void PIC_avatar_MouseEnter(object sender, EventArgs e)

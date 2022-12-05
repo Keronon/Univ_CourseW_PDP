@@ -139,6 +139,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\mail.png" />
+    <None Include="Resources\add.png" />
+    <None Include="Resources\append.png" />
     <Content Include="Resources\icon_b.ico" />
   </ItemGroup>
   <ItemGroup>
