@@ -62,6 +62,7 @@
             this.TEXT_mail = new System.Windows.Forms.RichTextBox();
             this.NOTIFY_ICON = new System.Windows.Forms.NotifyIcon(this.components);
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
+            this.DIALOG_append = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.SPLIT_container)).BeginInit();
             this.SPLIT_container.Panel1.SuspendLayout();
             this.SPLIT_container.Panel2.SuspendLayout();
@@ -249,6 +250,7 @@
             this.LIST_mails.Name = "LIST_mails";
             this.LIST_mails.Size = new System.Drawing.Size(300, 364);
             this.LIST_mails.TabIndex = 10;
+            this.LIST_mails.SelectedIndexChanged += new System.EventHandler(this.LIST_mails_SelectedIndexChanged);
             // 
             // PIC_avatar
             // 
@@ -274,13 +276,15 @@
             this.MENU_ITEM_refresh,
             this.MENU_ITEM_logout});
             this.CONTEXT_MENU_profile.Name = "CONTEXT_MENU_account";
-            this.CONTEXT_MENU_profile.Size = new System.Drawing.Size(241, 97);
+            this.CONTEXT_MENU_profile.Size = new System.Drawing.Size(241, 119);
             // 
             // MENU_ITEM_profile
             // 
+            this.MENU_ITEM_profile.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.MENU_ITEM_profile.Name = "MENU_ITEM_profile";
             this.MENU_ITEM_profile.Size = new System.Drawing.Size(180, 23);
-            this.MENU_ITEM_profile.Text = "current profile";
+            this.MENU_ITEM_profile.Text = "профилей нет";
+            this.MENU_ITEM_profile.SelectedIndexChanged += new System.EventHandler(this.MENU_ITEM_profile_SelectedIndexChanged);
             // 
             // MENU_ITEM_add
             // 
@@ -331,6 +335,7 @@
             this.BTN_append.Text = "Прикрепить";
             this.BTN_append.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.BTN_append.UseVisualStyleBackColor = true;
+            this.BTN_append.Click += new System.EventHandler(this.BTN_append_Click);
             // 
             // CHECK_u
             // 
@@ -370,7 +375,7 @@
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(531, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(537, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -387,7 +392,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(531, 23);
+            this.TXT_to.Size = new System.Drawing.Size(537, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -405,7 +410,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(531, 23);
+            this.TXT_from.Size = new System.Drawing.Size(537, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -428,12 +433,12 @@
             this.LIST_appended.Size = new System.Drawing.Size(575, 107);
             this.LIST_appended.TabIndex = 1;
             // 
-            // TEXT_message
+            // TEXT_mail
             // 
             this.TEXT_mail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
-            this.TEXT_mail.Name = "TEXT_message";
-            this.TEXT_mail.Size = new System.Drawing.Size(579, 288);
+            this.TEXT_mail.Name = "TEXT_mail";
+            this.TEXT_mail.Size = new System.Drawing.Size(585, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             // 
@@ -442,10 +447,17 @@
             this.NOTIFY_ICON.Icon = ((System.Drawing.Icon)(resources.GetObject("NOTIFY_ICON.Icon")));
             this.NOTIFY_ICON.Text = "Email Service";
             this.NOTIFY_ICON.Visible = true;
+            this.NOTIFY_ICON.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.NOTIFY_ICON_MouseDoubleClick);
             // 
             // TIP_fast
             // 
             this.TIP_fast.AutomaticDelay = 100;
+            // 
+            // DIALOG_append
+            // 
+            this.DIALOG_append.InitialDirectory = "D:\\";
+            this.DIALOG_append.Multiselect = true;
+            this.DIALOG_append.RestoreDirectory = true;
             // 
             // FORM_Main
             // 
@@ -462,6 +474,7 @@
             this.Name = "FORM_Main";
             this.ShowInTaskbar = false;
             this.Text = "Email Service";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FORM_Main_FormClosing);
             this.SPLIT_container.Panel1.ResumeLayout(false);
             this.SPLIT_container.Panel2.ResumeLayout(false);
             this.SPLIT_container.Panel2.PerformLayout();
@@ -508,6 +521,7 @@
         private System.Windows.Forms.ListBox LIST_appended;
         private System.Windows.Forms.Button BTN_send;
         private System.Windows.Forms.Button BTN_append;
+        private System.Windows.Forms.OpenFileDialog DIALOG_append;
     }
 }
 

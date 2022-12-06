@@ -37,19 +37,22 @@
             this.TXT_password = new System.Windows.Forms.TextBox();
             this.CHECK_remember = new System.Windows.Forms.CheckBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.TXT_name = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // BTN_ok
             // 
+            this.BTN_ok.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.BTN_ok.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.BTN_ok.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.BTN_ok.Location = new System.Drawing.Point(143, 201);
+            this.BTN_ok.Location = new System.Drawing.Point(143, 230);
             this.BTN_ok.Name = "BTN_ok";
             this.BTN_ok.Size = new System.Drawing.Size(75, 30);
             this.BTN_ok.TabIndex = 0;
             this.BTN_ok.Text = "Войти";
             this.BTN_ok.UseVisualStyleBackColor = true;
+            this.BTN_ok.Click += new System.EventHandler(this.BTN_ok_Click);
             // 
             // BTN_cancel
             // 
@@ -57,7 +60,7 @@
             this.BTN_cancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.BTN_cancel.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.BTN_cancel.ForeColor = System.Drawing.Color.DarkRed;
-            this.BTN_cancel.Location = new System.Drawing.Point(12, 201);
+            this.BTN_cancel.Location = new System.Drawing.Point(12, 230);
             this.BTN_cancel.Name = "BTN_cancel";
             this.BTN_cancel.Size = new System.Drawing.Size(75, 30);
             this.BTN_cancel.TabIndex = 1;
@@ -66,7 +69,7 @@
             // 
             // TXT_email
             // 
-            this.TXT_email.Location = new System.Drawing.Point(12, 118);
+            this.TXT_email.Location = new System.Drawing.Point(12, 147);
             this.TXT_email.Name = "TXT_email";
             this.TXT_email.Size = new System.Drawing.Size(206, 23);
             this.TXT_email.TabIndex = 4;
@@ -78,7 +81,7 @@
             // 
             // TXT_password
             // 
-            this.TXT_password.Location = new System.Drawing.Point(12, 147);
+            this.TXT_password.Location = new System.Drawing.Point(12, 176);
             this.TXT_password.Name = "TXT_password";
             this.TXT_password.PasswordChar = '*';
             this.TXT_password.Size = new System.Drawing.Size(206, 23);
@@ -88,7 +91,7 @@
             // CHECK_remember
             // 
             this.CHECK_remember.AutoSize = true;
-            this.CHECK_remember.Location = new System.Drawing.Point(12, 176);
+            this.CHECK_remember.Location = new System.Drawing.Point(12, 205);
             this.CHECK_remember.Name = "CHECK_remember";
             this.CHECK_remember.Size = new System.Drawing.Size(145, 19);
             this.CHECK_remember.TabIndex = 6;
@@ -105,14 +108,21 @@
             this.pictureBox1.TabIndex = 7;
             this.pictureBox1.TabStop = false;
             // 
+            // TXT_name
+            // 
+            this.TXT_name.Location = new System.Drawing.Point(12, 118);
+            this.TXT_name.Name = "TXT_name";
+            this.TXT_name.Size = new System.Drawing.Size(206, 23);
+            this.TXT_name.TabIndex = 8;
+            this.TIP_fast.SetToolTip(this.TXT_name, "Ник для подписи");
+            // 
             // FORM_Login
             // 
-            this.AcceptButton = this.BTN_ok;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.BTN_cancel;
-            this.ClientSize = new System.Drawing.Size(230, 243);
+            this.ClientSize = new System.Drawing.Size(230, 272);
             this.ControlBox = false;
+            this.Controls.Add(this.TXT_name);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.CHECK_remember);
             this.Controls.Add(this.TXT_password);
@@ -144,5 +154,6 @@
         private System.Windows.Forms.TextBox TXT_password;
         private System.Windows.Forms.CheckBox CHECK_remember;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.TextBox TXT_name;
     }
 }

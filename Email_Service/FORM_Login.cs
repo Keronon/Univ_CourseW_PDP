@@ -12,26 +12,37 @@ namespace Email_Service
 {
     public partial class FORM_Login : Form
     {
-        public User profile;
+        public Profile profile;
 
         public FORM_Login()
         {
             InitializeComponent();
+        }
 
-            // +++ !!!
-
-            profile.email    = "KerononS.learn@gmail.com"; // ! Rubert.007@yandex.ru
-            profile.password = "IdzanagiBurden0w0";        // ! 2jj1fh7tvr2H
-
-            // +++ !!!
+        private void BTN_ok_Click(object sender, EventArgs e)
+        {
+            profile = new Profile(TXT_name.Text, TXT_email.Text, TXT_password.Text, CHECK_remember.Checked);
         }
     }
 
-    public struct User
+    public class Profile
     {
+        public string name;
         public string email;
         public string password;
         public bool   remember;
+        public char   server;
+
+        public Profile(string name, string email, string password, bool remember)
+        {
+            this.name = name;
+            this.email = email;
+            this.password = password;
+            this.remember = remember;
+                 if (email.EndsWith("@gmail.com")) this.server = 'G';
+            else if (email.Contains("@yandex."))   this.server = 'Y';
+            else                                   this.server = 'N';
+        }
 
         override public string ToString()
         {

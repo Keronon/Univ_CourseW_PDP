@@ -1,0 +1,10 @@
+﻿
+# Test data
+
+KerononS.learn@gmail.com
+IdzanagiBurden0w0
+imap.gmail.com SSL 993
+
+Rubert.007@yandex.ru
+zijyiyrjorjshwnq
+imap.yandex.ru SSL 993

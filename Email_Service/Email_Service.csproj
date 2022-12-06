@@ -148,6 +148,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Other.txt" />
     <None Include="Resources\images\img_yandex.png" />
     <None Include="Resources\images\img_google.png" />
     <None Include="Resources\mails\mail_trash.png" />
@@ -158,17 +159,6 @@
     <None Include="Resources\mails\mail_drafts.png" />
     <None Include="Resources\mails\mail_all.png" />
     <None Include="Resources\images\img_user.png" />
-    <None Include="Resources\send.png" />
-    <None Include="Resources\trash.png" />
-    <None Include="Resources\spam.png" />
-    <None Include="Resources\receive.png" />
-    <None Include="Resources\important.png" />
-    <None Include="Resources\mail.png" />
-    <None Include="Resources\add.png" />
-    <None Include="Resources\append.png" />
-    <None Include="Resources\all.png" />
-    <None Include="Resources\arrive.png" />
-    <None Include="Resources\drafts.png" />
     <None Include="Resources\buttons\btn_add.png" />
     <None Include="Resources\buttons\btn_append.png" />
     <None Include="Resources\buttons\btn_apply.png" />
@@ -177,14 +167,6 @@
     <None Include="Resources\buttons\btn_send_mail.png" />
     <None Include="Resources\buttons\btn_update.png" />
     <Content Include="Resources\icons\icon_b.ico" />
-    <Content Include="Resources\icon_b.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\apply.png" />
-    <None Include="Resources\user.png" />
-    <None Include="Resources\update.png" />
-    <None Include="Resources\login.png" />
-    <None Include="Resources\logout.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
