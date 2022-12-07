@@ -48,7 +48,7 @@
             this.MENU_ITEM_refresh = new System.Windows.Forms.ToolStripMenuItem();
             this.MENU_ITEM_logout = new System.Windows.Forms.ToolStripMenuItem();
             this.BTN_send = new System.Windows.Forms.Button();
-            this.BTN_append = new System.Windows.Forms.Button();
+            this.BTN_attach = new System.Windows.Forms.Button();
             this.CHECK_u = new System.Windows.Forms.CheckBox();
             this.CHECK_i = new System.Windows.Forms.CheckBox();
             this.CHECK_b = new System.Windows.Forms.CheckBox();
@@ -58,7 +58,9 @@
             this.LBL_to = new System.Windows.Forms.Label();
             this.TXT_from = new System.Windows.Forms.TextBox();
             this.LBL_from = new System.Windows.Forms.Label();
-            this.LIST_appended = new System.Windows.Forms.ListBox();
+            this.LIST_attached = new System.Windows.Forms.ListBox();
+            this.CONTEXT_MENU_attached = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.MENU_ITEM_detach = new System.Windows.Forms.ToolStripMenuItem();
             this.TEXT_mail = new System.Windows.Forms.RichTextBox();
             this.NOTIFY_ICON = new System.Windows.Forms.NotifyIcon(this.components);
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
@@ -70,6 +72,7 @@
             this.FLOW_PANEL_mail_folders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).BeginInit();
             this.CONTEXT_MENU_profile.SuspendLayout();
+            this.CONTEXT_MENU_attached.SuspendLayout();
             this.SuspendLayout();
             // 
             // SPLIT_container
@@ -91,7 +94,7 @@
             // SPLIT_container.Panel2
             // 
             this.SPLIT_container.Panel2.Controls.Add(this.BTN_send);
-            this.SPLIT_container.Panel2.Controls.Add(this.BTN_append);
+            this.SPLIT_container.Panel2.Controls.Add(this.BTN_attach);
             this.SPLIT_container.Panel2.Controls.Add(this.CHECK_u);
             this.SPLIT_container.Panel2.Controls.Add(this.CHECK_i);
             this.SPLIT_container.Panel2.Controls.Add(this.CHECK_b);
@@ -101,7 +104,7 @@
             this.SPLIT_container.Panel2.Controls.Add(this.LBL_to);
             this.SPLIT_container.Panel2.Controls.Add(this.TXT_from);
             this.SPLIT_container.Panel2.Controls.Add(this.LBL_from);
-            this.SPLIT_container.Panel2.Controls.Add(this.LIST_appended);
+            this.SPLIT_container.Panel2.Controls.Add(this.LIST_attached);
             this.SPLIT_container.Panel2.Controls.Add(this.TEXT_mail);
             this.SPLIT_container.Panel2MinSize = 400;
             this.SPLIT_container.Size = new System.Drawing.Size(884, 561);
@@ -276,7 +279,7 @@
             this.MENU_ITEM_refresh,
             this.MENU_ITEM_logout});
             this.CONTEXT_MENU_profile.Name = "CONTEXT_MENU_account";
-            this.CONTEXT_MENU_profile.Size = new System.Drawing.Size(241, 119);
+            this.CONTEXT_MENU_profile.Size = new System.Drawing.Size(241, 97);
             // 
             // MENU_ITEM_profile
             // 
@@ -324,18 +327,18 @@
             this.BTN_send.UseVisualStyleBackColor = true;
             this.BTN_send.Click += new System.EventHandler(this.BTN_send_Click);
             // 
-            // BTN_append
+            // BTN_attach
             // 
-            this.BTN_append.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.BTN_append.Image = global::Email_Service.Properties.Resources.btn_append;
-            this.BTN_append.Location = new System.Drawing.Point(3, 528);
-            this.BTN_append.Name = "BTN_append";
-            this.BTN_append.Size = new System.Drawing.Size(109, 30);
-            this.BTN_append.TabIndex = 13;
-            this.BTN_append.Text = "Прикрепить";
-            this.BTN_append.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.BTN_append.UseVisualStyleBackColor = true;
-            this.BTN_append.Click += new System.EventHandler(this.BTN_append_Click);
+            this.BTN_attach.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.BTN_attach.Image = global::Email_Service.Properties.Resources.btn_append;
+            this.BTN_attach.Location = new System.Drawing.Point(3, 528);
+            this.BTN_attach.Name = "BTN_attach";
+            this.BTN_attach.Size = new System.Drawing.Size(109, 30);
+            this.BTN_attach.TabIndex = 13;
+            this.BTN_attach.Text = "Прикрепить";
+            this.BTN_attach.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.BTN_attach.UseVisualStyleBackColor = true;
+            this.BTN_attach.Click += new System.EventHandler(this.BTN_attach_Click);
             // 
             // CHECK_u
             // 
@@ -375,7 +378,7 @@
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(537, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(540, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -392,7 +395,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(537, 23);
+            this.TXT_to.Size = new System.Drawing.Size(540, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -410,7 +413,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(537, 23);
+            this.TXT_from.Size = new System.Drawing.Size(540, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -422,23 +425,40 @@
             this.LBL_from.TabIndex = 3;
             this.LBL_from.Text = "From:";
             // 
-            // LIST_appended
+            // LIST_attached
             // 
-            this.LIST_appended.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.LIST_appended.ForeColor = System.Drawing.Color.DarkBlue;
-            this.LIST_appended.FormattingEnabled = true;
-            this.LIST_appended.ItemHeight = 15;
-            this.LIST_appended.Location = new System.Drawing.Point(3, 415);
-            this.LIST_appended.Name = "LIST_appended";
-            this.LIST_appended.Size = new System.Drawing.Size(575, 107);
-            this.LIST_appended.TabIndex = 1;
+            this.LIST_attached.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LIST_attached.ContextMenuStrip = this.CONTEXT_MENU_attached;
+            this.LIST_attached.ForeColor = System.Drawing.Color.DarkBlue;
+            this.LIST_attached.FormattingEnabled = true;
+            this.LIST_attached.ItemHeight = 15;
+            this.LIST_attached.Location = new System.Drawing.Point(3, 415);
+            this.LIST_attached.Name = "LIST_attached";
+            this.LIST_attached.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.LIST_attached.Size = new System.Drawing.Size(575, 107);
+            this.LIST_attached.TabIndex = 1;
+            // 
+            // CONTEXT_MENU_attached
+            // 
+            this.CONTEXT_MENU_attached.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MENU_ITEM_detach});
+            this.CONTEXT_MENU_attached.Name = "CONTEXT_MENU_appended";
+            this.CONTEXT_MENU_attached.Size = new System.Drawing.Size(133, 26);
+            // 
+            // MENU_ITEM_detach
+            // 
+            this.MENU_ITEM_detach.ForeColor = System.Drawing.Color.DarkRed;
+            this.MENU_ITEM_detach.Name = "MENU_ITEM_detach";
+            this.MENU_ITEM_detach.Size = new System.Drawing.Size(132, 22);
+            this.MENU_ITEM_detach.Text = "Открепить";
+            this.MENU_ITEM_detach.Click += new System.EventHandler(this.MENU_ITEM_detach_Click);
             // 
             // TEXT_mail
             // 
             this.TEXT_mail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(585, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(588, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             // 
@@ -483,6 +503,7 @@
             this.FLOW_PANEL_mail_folders.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).EndInit();
             this.CONTEXT_MENU_profile.ResumeLayout(false);
+            this.CONTEXT_MENU_attached.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -518,10 +539,12 @@
         private System.Windows.Forms.Label LBL_topic;
         private System.Windows.Forms.Label LBL_to;
         private System.Windows.Forms.Label LBL_from;
-        private System.Windows.Forms.ListBox LIST_appended;
+        private System.Windows.Forms.ListBox LIST_attached;
         private System.Windows.Forms.Button BTN_send;
-        private System.Windows.Forms.Button BTN_append;
+        private System.Windows.Forms.Button BTN_attach;
         private System.Windows.Forms.OpenFileDialog DIALOG_append;
+        private System.Windows.Forms.ContextMenuStrip CONTEXT_MENU_attached;
+        private System.Windows.Forms.ToolStripMenuItem MENU_ITEM_detach;
     }
 }
 

@@ -21,7 +21,7 @@ namespace Email_Service
 
         #endregion VARIABLES
 
-        // ! ===== ===== ===== ===== =====
+        // # ===== ===== ===== ===== =====
 
         #region FUNCTIONS
 
@@ -47,7 +47,7 @@ namespace Email_Service
             TXT_to      .ReadOnly = true; TXT_to   .Text = "";
             TXT_topic   .ReadOnly = true; TXT_topic.Text = "";
             TEXT_mail   .ReadOnly = true; TEXT_mail.Text = "";
-            BTN_append.Enabled = false; BTN_append.Show();
+            BTN_attach.Enabled = false; BTN_attach.Show();
             BTN_send  .Enabled = false; BTN_send.Text = "Отправить";
         }
 
@@ -57,7 +57,7 @@ namespace Email_Service
             TXT_to   .ReadOnly = false;
             TXT_topic.ReadOnly = false;
             TEXT_mail.ReadOnly = false;
-            BTN_append.Enabled = true; BTN_append.Show();
+            BTN_attach.Enabled = true; BTN_attach.Show();
             BTN_send  .Enabled = true; BTN_send.Text = "Отправить";
         }
 
@@ -67,7 +67,7 @@ namespace Email_Service
             TXT_to   .ReadOnly = true;
             TXT_topic.ReadOnly = true;
             TEXT_mail.ReadOnly = true;
-            BTN_append.Enabled = true; BTN_append.Hide();
+            BTN_attach.Enabled = true; BTN_attach.Hide();
             BTN_send.Enabled   = true; BTN_send.Text = "Ответить";
         }
 
@@ -78,13 +78,14 @@ namespace Email_Service
 
         #endregion FUNCTIONS
 
-        // ! ===== ===== ===== ===== =====
+        // # ===== ===== ===== ===== =====
 
         #region FORM
 
         private void NOTIFY_ICON_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         public FORM_Main()
@@ -93,9 +94,9 @@ namespace Email_Service
 
             State_no_user();
         }
-        private void FORM_Main_FormClosing(object sender, FormClosingEventArgs e) // + Save profiles
+        private void FORM_Main_FormClosing(object sender, FormClosingEventArgs e) // ! ->
         {
-
+            // +++ Save profiles
         }
 
         private void PIC_avatar_MouseEnter(object sender, EventArgs e)
@@ -107,7 +108,7 @@ namespace Email_Service
             PIC_avatar.BackColor = Color.LightCyan;
         }
 
-        // !! MENU profile
+        // # MENU profile
 
         private void MENU_ITEM_add_Click(object sender, EventArgs e)
         {
@@ -156,7 +157,7 @@ namespace Email_Service
             State_on_user();
         }
 
-        // !! =====
+        // # =====
 
         private void BTN_new_chain_Click(object sender, EventArgs e)
         {
@@ -173,18 +174,18 @@ namespace Email_Service
             mail = LIST_mails.SelectedItem as MimeMessage;
         }
 
-        private void BTN_append_Click(object sender, EventArgs e)
+        private void BTN_attach_Click(object sender, EventArgs e)
         {
             if (DIALOG_append.ShowDialog() == DialogResult.OK)
             {
                 for (int i = 0; i < DIALOG_append.FileNames.Length; i++)
                 {
                     File_data file = new File_data(DIALOG_append.FileNames[i], DIALOG_append.SafeFileNames[i]);
-                    LIST_appended.Items.Add(file);
+                    LIST_attached.Items.Add(file);
                 }
             }
         }
-        private void BTN_send_Click(object sender, EventArgs e)
+        private void BTN_send_Click(object sender, EventArgs e) // ! ->
         {
             if (BTN_send.Text == "Отправить")
             {
@@ -192,8 +193,16 @@ namespace Email_Service
                 message.From.Add(new MailboxAddress(profile.name, profile.email));
                 message.To.Add(new MailboxAddress(TXT_to.Text,  TXT_to.Text));
                 message.Subject = TXT_topic.Text;
-                message.Body = new TextPart("plain") { Text = TEXT_mail.Rtf };
-                if (TXT_to.ReadOnly) message.InReplyTo = mail.MessageId;
+
+                var builder = new BodyBuilder();
+                builder.HtmlBody = MarkupConverter.RtfToHtmlConverter.ConvertRtfToHtml(TEXT_mail.Rtf);
+                for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                {
+                    builder.Attachments.Add((LIST_attached.Items[i] as File_data).full_name);
+                }
+                message.Body = builder.ToMessageBody();
+
+                // +++ if (TXT_to.ReadOnly) message.InReplyTo = mail.MessageId;
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
@@ -204,8 +213,13 @@ namespace Email_Service
                     client.Send(message);
                     client.Disconnect(true);
                 }
+
+                MessageBox.Show("Сообщение отправлено");
+
+                // +++ Update mailbox and select sent mail
+                Mail_receive(); // ! <-
             }
-            else // "Ответить"
+            else // # "Ответить"
             {
                 Mail_send();
                 if (TXT_to.Text == profile.name || TXT_to.Text == profile.email)
@@ -216,7 +230,15 @@ namespace Email_Service
                 TXT_to   .ReadOnly = true;
                 TXT_topic.ReadOnly = true;
                 TEXT_mail.Text = "";
+                LIST_attached.Items.Clear();
             }
+        }
+        private void MENU_ITEM_detach_Click(object sender, EventArgs e)
+        {
+            if (LIST_attached.SelectedItem == null)
+                MessageBox.Show("Выберите файлы чтобы открепить");
+            while (LIST_attached.SelectedItems.Count > 0)
+                LIST_attached.Items.Remove(LIST_attached.SelectedItems[0]);
         }
 
         #endregion FORM
