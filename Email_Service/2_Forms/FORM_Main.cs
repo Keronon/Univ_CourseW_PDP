@@ -174,6 +174,42 @@ namespace Email_Service
             mail = LIST_mails.SelectedItem as MimeMessage;
         }
 
+        // # CHECKs text format
+
+        private void CHECK_b_CheckedChanged(object sender, EventArgs e)
+        {
+            FontStyle font = FontStyle.Regular;
+            if (TEXT_mail.SelectionFont.Italic)    font = font | FontStyle.Italic;
+            if (TEXT_mail.SelectionFont.Underline) font = font | FontStyle.Underline;
+            if (CHECK_b.Checked)                   font = font | FontStyle.Bold;
+            TEXT_mail.SelectionFont = new Font(TEXT_mail.Font, font);
+        }
+        private void CHECK_i_CheckedChanged(object sender, EventArgs e)
+        {
+            FontStyle font = FontStyle.Regular;
+            if (TEXT_mail.SelectionFont.Bold)      font = font | FontStyle.Bold;
+            if (TEXT_mail.SelectionFont.Underline) font = font | FontStyle.Underline;
+            if (CHECK_i.Checked)                   font = font | FontStyle.Italic;
+            TEXT_mail.SelectionFont = new Font(TEXT_mail.Font, font);
+        }
+        private void CHECK_u_CheckedChanged(object sender, EventArgs e)
+        {
+            FontStyle font = FontStyle.Regular;
+            if (TEXT_mail.SelectionFont.Bold)   font = font | FontStyle.Bold;
+            if (TEXT_mail.SelectionFont.Italic) font = font | FontStyle.Italic;
+            if (CHECK_u.Checked)                font = font | FontStyle.Underline;
+            TEXT_mail.SelectionFont = new Font(TEXT_mail.Font, font);
+        }
+
+        private void TEXT_mail_SelectionChanged(object sender, EventArgs e)
+        {
+            CHECK_b.Checked = TEXT_mail.SelectionFont.Bold;
+            CHECK_i.Checked = TEXT_mail.SelectionFont.Italic;
+            CHECK_u.Checked = TEXT_mail.SelectionFont.Underline;
+        }
+
+        // # =====
+
         private void BTN_attach_Click(object sender, EventArgs e)
         {
             if (DIALOG_append.ShowDialog() == DialogResult.OK)

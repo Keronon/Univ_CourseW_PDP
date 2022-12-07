@@ -105,25 +105,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Crypto_module.cs" />
-    <Compile Include="FORM_Login.cs">
+    <Compile Include="3_Classes\Crypto_module.cs" />
+    <Compile Include="2_Forms\FORM_Login.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FORM_Login.Designer.cs">
+    <Compile Include="2_Forms\FORM_Login.Designer.cs">
       <DependentUpon>FORM_Login.cs</DependentUpon>
     </Compile>
-    <Compile Include="FORM_Main.cs">
+    <Compile Include="2_Forms\FORM_Main.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FORM_Main.Designer.cs">
+    <Compile Include="2_Forms\FORM_Main.Designer.cs">
       <DependentUpon>FORM_Main.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="1_Core\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FORM_Login.resx">
+    <EmbeddedResource Include="2_Forms\FORM_Login.resx">
       <DependentUpon>FORM_Login.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FORM_Main.resx">
+    <EmbeddedResource Include="2_Forms\FORM_Main.resx">
       <DependentUpon>FORM_Main.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -131,7 +131,7 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
+    <None Include="1_Core\packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -148,7 +148,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="1_Core\App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Other.txt" />

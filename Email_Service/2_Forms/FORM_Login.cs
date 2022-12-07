@@ -21,7 +21,8 @@ namespace Email_Service
 
         private void BTN_ok_Click(object sender, EventArgs e)
         {
-            profile = new Profile(TXT_name.Text, TXT_email.Text, TXT_password.Text, CHECK_remember.Checked);
+            // ! profile = new Profile(TXT_name.Text, TXT_email.Text, TXT_password.Text, CHECK_remember.Checked);
+            profile = new Profile("", "Rubert.007@yandex.ru", "zijyiyrjorjshwnq", false);
         }
     }
 

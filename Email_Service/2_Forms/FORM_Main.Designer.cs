@@ -350,6 +350,7 @@
             this.CHECK_u.TabIndex = 12;
             this.CHECK_u.Text = "u";
             this.CHECK_u.UseVisualStyleBackColor = true;
+            this.CHECK_u.CheckedChanged += new System.EventHandler(this.CHECK_u_CheckedChanged);
             // 
             // CHECK_i
             // 
@@ -361,6 +362,7 @@
             this.CHECK_i.TabIndex = 11;
             this.CHECK_i.Text = "i";
             this.CHECK_i.UseVisualStyleBackColor = true;
+            this.CHECK_i.CheckedChanged += new System.EventHandler(this.CHECK_i_CheckedChanged);
             // 
             // CHECK_b
             // 
@@ -372,13 +374,14 @@
             this.CHECK_b.TabIndex = 10;
             this.CHECK_b.Text = "B";
             this.CHECK_b.UseVisualStyleBackColor = true;
+            this.CHECK_b.CheckedChanged += new System.EventHandler(this.CHECK_b_CheckedChanged);
             // 
             // TXT_topic
             // 
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(540, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(527, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -395,7 +398,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(540, 23);
+            this.TXT_to.Size = new System.Drawing.Size(527, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -413,7 +416,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(540, 23);
+            this.TXT_from.Size = new System.Drawing.Size(527, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -456,11 +459,13 @@
             // TEXT_mail
             // 
             this.TEXT_mail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TEXT_mail.Font = new System.Drawing.Font("Times New Roman", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(588, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(575, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
+            this.TEXT_mail.SelectionChanged += new System.EventHandler(this.TEXT_mail_SelectionChanged);
             // 
             // NOTIFY_ICON
             // 
