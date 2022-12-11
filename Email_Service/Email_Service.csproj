@@ -151,7 +151,8 @@
     <None Include="1_Core\App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Other.txt" />
+    <Content Include="Resources\ToDo.txt" />
+    <None Include="Resources\images\gif_loading.gif" />
     <None Include="Resources\images\img_yandex.png" />
     <None Include="Resources\images\img_google.png" />
     <None Include="Resources\mails\mail_trash.png" />

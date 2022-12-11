@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FORM_Main));
             this.SPLIT_container = new System.Windows.Forms.SplitContainer();
+            this.PIC_loading = new System.Windows.Forms.PictureBox();
+            this.LIST_mails = new System.Windows.Forms.ListBox();
             this.FLOW_PANEL_mail_folders = new System.Windows.Forms.FlowLayoutPanel();
             this.RADIO_mail_all = new System.Windows.Forms.RadioButton();
             this.RADIO_mail_sent = new System.Windows.Forms.RadioButton();
@@ -40,7 +42,6 @@
             this.RADIO_mail_spam = new System.Windows.Forms.RadioButton();
             this.RADIO_mail_trash = new System.Windows.Forms.RadioButton();
             this.BTN_new_chain = new System.Windows.Forms.Button();
-            this.LIST_mails = new System.Windows.Forms.ListBox();
             this.PIC_avatar = new System.Windows.Forms.PictureBox();
             this.CONTEXT_MENU_profile = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MENU_ITEM_profile = new System.Windows.Forms.ToolStripComboBox();
@@ -72,6 +73,7 @@
             this.SPLIT_container.Panel1.SuspendLayout();
             this.SPLIT_container.Panel2.SuspendLayout();
             this.SPLIT_container.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_loading)).BeginInit();
             this.FLOW_PANEL_mail_folders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).BeginInit();
             this.CONTEXT_MENU_profile.SuspendLayout();
@@ -88,9 +90,10 @@
             // 
             // SPLIT_container.Panel1
             // 
+            this.SPLIT_container.Panel1.Controls.Add(this.PIC_loading);
+            this.SPLIT_container.Panel1.Controls.Add(this.LIST_mails);
             this.SPLIT_container.Panel1.Controls.Add(this.FLOW_PANEL_mail_folders);
             this.SPLIT_container.Panel1.Controls.Add(this.BTN_new_chain);
-            this.SPLIT_container.Panel1.Controls.Add(this.LIST_mails);
             this.SPLIT_container.Panel1.Controls.Add(this.PIC_avatar);
             this.SPLIT_container.Panel1MinSize = 200;
             // 
@@ -117,6 +120,28 @@
             this.SPLIT_container.SplitterDistance = 300;
             this.SPLIT_container.SplitterWidth = 3;
             this.SPLIT_container.TabIndex = 0;
+            // 
+            // PIC_loading
+            // 
+            this.PIC_loading.BackColor = System.Drawing.Color.Transparent;
+            this.PIC_loading.Image = global::Email_Service.Properties.Resources.gif_loading;
+            this.PIC_loading.Location = new System.Drawing.Point(3, 508);
+            this.PIC_loading.Name = "PIC_loading";
+            this.PIC_loading.Size = new System.Drawing.Size(50, 50);
+            this.PIC_loading.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PIC_loading.TabIndex = 14;
+            this.PIC_loading.TabStop = false;
+            this.PIC_loading.Visible = false;
+            // 
+            // LIST_mails
+            // 
+            this.LIST_mails.FormattingEnabled = true;
+            this.LIST_mails.ItemHeight = 15;
+            this.LIST_mails.Location = new System.Drawing.Point(0, 197);
+            this.LIST_mails.Name = "LIST_mails";
+            this.LIST_mails.Size = new System.Drawing.Size(300, 364);
+            this.LIST_mails.TabIndex = 13;
+            this.LIST_mails.SelectedIndexChanged += new System.EventHandler(this.LIST_mails_SelectedIndexChanged);
             // 
             // FLOW_PANEL_mail_folders
             // 
@@ -259,17 +284,6 @@
             this.BTN_new_chain.UseVisualStyleBackColor = true;
             this.BTN_new_chain.Click += new System.EventHandler(this.BTN_new_chain_Click);
             // 
-            // LIST_mails
-            // 
-            this.LIST_mails.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.LIST_mails.FormattingEnabled = true;
-            this.LIST_mails.ItemHeight = 15;
-            this.LIST_mails.Location = new System.Drawing.Point(0, 197);
-            this.LIST_mails.Name = "LIST_mails";
-            this.LIST_mails.Size = new System.Drawing.Size(300, 364);
-            this.LIST_mails.TabIndex = 10;
-            this.LIST_mails.SelectedIndexChanged += new System.EventHandler(this.LIST_mails_SelectedIndexChanged);
-            // 
             // PIC_avatar
             // 
             this.PIC_avatar.BackColor = System.Drawing.Color.LightCyan;
@@ -301,7 +315,7 @@
             this.MENU_ITEM_profile.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.MENU_ITEM_profile.Name = "MENU_ITEM_profile";
             this.MENU_ITEM_profile.Size = new System.Drawing.Size(180, 23);
-            this.MENU_ITEM_profile.Text = "профилей нет";
+            this.MENU_ITEM_profile.Text = "профиль не выбран";
             this.MENU_ITEM_profile.SelectedIndexChanged += new System.EventHandler(this.MENU_ITEM_profile_SelectedIndexChanged);
             // 
             // MENU_ITEM_add
@@ -338,7 +352,8 @@
             this.TXT_time.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_time.Location = new System.Drawing.Point(378, 90);
             this.TXT_time.Name = "TXT_time";
-            this.TXT_time.Size = new System.Drawing.Size(202, 23);
+            this.TXT_time.ReadOnly = true;
+            this.TXT_time.Size = new System.Drawing.Size(197, 23);
             this.TXT_time.TabIndex = 16;
             // 
             // LBL_time
@@ -417,7 +432,7 @@
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(529, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(524, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -434,7 +449,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(529, 23);
+            this.TXT_to.Size = new System.Drawing.Size(524, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -452,7 +467,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(529, 23);
+            this.TXT_from.Size = new System.Drawing.Size(524, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -499,7 +514,7 @@
             this.TEXT_mail.Font = new System.Drawing.Font("Times New Roman", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(577, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(572, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             this.TEXT_mail.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TEXT_mail_MouseDown);
@@ -523,8 +538,7 @@
             // 
             // TIMER_refresher
             // 
-            this.TIMER_refresher.Enabled = true;
-            this.TIMER_refresher.Interval = 10000;
+            this.TIMER_refresher.Interval = 300000;
             this.TIMER_refresher.Tick += new System.EventHandler(this.TIMER_refresher_Tick);
             // 
             // FORM_Main
@@ -548,6 +562,7 @@
             this.SPLIT_container.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SPLIT_container)).EndInit();
             this.SPLIT_container.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_loading)).EndInit();
             this.FLOW_PANEL_mail_folders.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).EndInit();
             this.CONTEXT_MENU_profile.ResumeLayout(false);
@@ -576,7 +591,6 @@
         private System.Windows.Forms.RadioButton RADIO_mail_drafts;
         private System.Windows.Forms.RadioButton RADIO_mail_important;
         private System.Windows.Forms.RadioButton RADIO_mail_receive;
-        private System.Windows.Forms.ListBox LIST_mails;
         private System.Windows.Forms.Button BTN_new_chain;
         private System.Windows.Forms.CheckBox CHECK_u;
         private System.Windows.Forms.CheckBox CHECK_i;
@@ -596,6 +610,8 @@
         private System.Windows.Forms.Timer TIMER_refresher;
         private System.Windows.Forms.TextBox TXT_time;
         private System.Windows.Forms.Label LBL_time;
+        private System.Windows.Forms.ListBox LIST_mails;
+        private System.Windows.Forms.PictureBox PIC_loading;
     }
 }
 

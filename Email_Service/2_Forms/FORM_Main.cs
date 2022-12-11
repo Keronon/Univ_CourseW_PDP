@@ -2,9 +2,17 @@
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Net.Smtp;
+
 using System;
+using System.IO;
+using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using System.Xml.Linq;
+using System.Text.Json;
 
 namespace Email_Service
 {
@@ -12,11 +20,46 @@ namespace Email_Service
     {
         #region VARIABLES
 
-        Profile profile;
-        Mail    cur_mail;
+        private const string PATH_profiles      = @"Profiles\";
+        private const string PATH_profiles_json = @"Profiles\profiles.json";
+        private const string PATH_attachments   = @"\Mails\Attachments\";
+        private const string PATH_storage       = @"\Mails\storage.xml";
+        private const string NEW_storage =
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<mails>
 
-        SmtpClient smtp_client;
-        ImapClient imap_client;
+  <other>
+  </other>
+
+  <sent>
+  </sent>
+
+  <receive>
+  </receive>
+
+  <important>
+  </important>
+
+  <drafts>
+  </drafts>
+
+  <spam>
+  </spam>
+
+  <trash>
+  </trash>
+
+</mails>";
+
+        private Profile profile;
+        private Mail    cur_mail;
+
+        private bool       connected;
+        private SmtpClient smtp_client;
+        private ImapClient imap_client;
+
+        private bool cancel;
+        private Task refreshing;
 
         #endregion VARIABLES
 
@@ -31,6 +74,7 @@ namespace Email_Service
             TXT_from  .ReadOnly = true;  TXT_from .Text = "";
             TXT_to    .ReadOnly = true;  TXT_to   .Text = "";
             TXT_topic .ReadOnly = true;  TXT_topic.Text = "";
+            TXT_time .Text = "";
             TEXT_mail .ReadOnly = true;  TEXT_mail.Text = "";
             BTN_attach.Enabled  = false; BTN_attach.Show();
             BTN_send  .Enabled  = false; BTN_send.Text = "Отправить";
@@ -59,20 +103,22 @@ namespace Email_Service
 
         // # =====
 
-        private bool Connect_clients(Profile profile)
+        private async void Connect_clients(Profile profile)
         {
+            if (refreshing != null && !refreshing.IsCompleted) { cancel = true; await refreshing; }
             if (imap_client.IsConnected || smtp_client.IsConnected)
             {
                 imap_client.Disconnect(true);
                 smtp_client.Disconnect(true);
+                connected = false;
             }
 
-            if (profile.server == 'N')
+            if (profile.Server == 'N')
             {
                 MessageBox.Show("Домен указанной почты не поддерживается");
-                return false;
+                return;
             }
-            else if (profile.server == 'G')
+            else if (profile.Server == 'G')
             {
                 imap_client.Connect("imap.gmail.com", 993, true);
                 smtp_client.Connect("smtp.gmail.com", 465, true);
@@ -80,7 +126,7 @@ namespace Email_Service
                 RADIO_mail_receive  .Enabled = false;
                 RADIO_mail_important.Enabled = true;
             }
-            else if (profile.server == 'Y')
+            else if (profile.Server == 'Y')
             {
                 imap_client.Connect("imap.yandex.ru", 993, true);
                 smtp_client.Connect("smtp.yandex.ru", 465, true);
@@ -91,18 +137,92 @@ namespace Email_Service
 
             try
             {
-                imap_client.Authenticate(profile.email, profile.password);
-                smtp_client.Authenticate(profile.email, profile.password);
+                imap_client.Authenticate(profile.Email, profile.Password);
+                smtp_client.Authenticate(profile.Email, profile.Password);
             }
             catch
             {
                 MessageBox.Show("Вход в аккаунт неудался\nПроверьте, пожалуйста, данные для входа");
                 imap_client.Disconnect(true);
                 smtp_client.Disconnect(true);
-                return false;
+                return;
             }
 
-            return true;
+            TIMER_refresher.Start();
+            connected = true;
+            return;
+        }
+
+        private void Process_inbox(IMailFolder folder, XElement storage, XElement write_to = null)
+        {
+            if (folder == null) return;
+
+            try { folder.Open(FolderAccess.ReadOnly); } catch { return; }
+            foreach (var mail_data in folder.Fetch(0, -1, MessageSummaryItems.UniqueId))
+            {
+                bool new_mail = true;
+                foreach (XElement mail in storage.Elements("mail"))
+                {
+                    if (mail.Attribute("UID").Value == mail_data.UniqueId.ToString()) new_mail = false;
+                }
+                if (new_mail)
+                {
+                    MimeMessage mail;
+                    try { mail = folder.GetMessage(mail_data.UniqueId); } catch { continue; }
+                    List<string> files = new List<string>();
+                    foreach (var attached in mail.Attachments)
+                    {
+                        var file = (MimePart)attached;
+                        string name = file.FileName.Replace(' ', '_').Replace('(', '_').Replace(')', '_').Replace('&', '_').Replace('<', '_').Replace('>', '_');
+                        try
+                        {
+                            using (var stream = File.Create(PATH_profiles + profile.Email + PATH_attachments + name))
+                                file.Content.DecodeTo(stream);
+
+                            files.Add(name);
+                        }
+                        catch { }
+                    }
+                    XElement x_mail = new XElement("mail",
+                                          new XAttribute("UID",        mail_data.UniqueId.ToString()),
+                                          new XAttribute("from",       mail.From.ToString()),
+                                          new XAttribute("to",         mail.To.ToString()),
+                                          new XAttribute("topic",      mail.Subject),
+                                          new XAttribute("time",       mail.Date.ToString("g")),
+                                          new XAttribute("text_plain", mail.TextBody ?? ""),
+                                          new XAttribute("text_html",  mail.HtmlBody ?? "")
+                                          );
+                    foreach (string file in files) x_mail.Add(new XElement(file));
+                    if (write_to == null) storage.Add(x_mail);
+                    else                 write_to.Add(x_mail);
+                }
+            }
+        }
+        private void Refresh_mails()
+        {
+            PIC_loading.Invoke(new Action(() => PIC_loading.Show()));
+
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.Sent),      storage.Root.Element("sent"));
+            if (cancel) return; try { Process_inbox(imap_client.GetFolder("Исходящие"),       storage.Root.Element("receive")); } catch { }
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.Important), storage.Root.Element("important"));
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.Drafts),    storage.Root.Element("drafts"));
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.Junk),      storage.Root.Element("spam"));
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.Trash),     storage.Root.Element("trash"));
+
+            if (cancel) return; Process_inbox(imap_client.GetFolder(SpecialFolder.All), storage.Root, storage.Root.Element("other"));
+            storage.Save(PATH_profiles + profile.Email + PATH_storage);
+
+                 if (RADIO_mail_all      .Checked) RADIO_mail_all      .Invoke(new Action(() => RADIO_mail_all      .Checked = true));
+            else if (RADIO_mail_sent     .Checked) RADIO_mail_sent     .Invoke(new Action(() => RADIO_mail_sent     .Checked = true));
+            else if (RADIO_mail_receive  .Checked) RADIO_mail_receive  .Invoke(new Action(() => RADIO_mail_receive  .Checked = true));
+            else if (RADIO_mail_important.Checked) RADIO_mail_important.Invoke(new Action(() => RADIO_mail_important.Checked = true));
+            else if (RADIO_mail_drafts   .Checked) RADIO_mail_drafts   .Invoke(new Action(() => RADIO_mail_drafts   .Checked = true));
+            else if (RADIO_mail_spam     .Checked) RADIO_mail_spam     .Invoke(new Action(() => RADIO_mail_spam     .Checked = true));
+            else if (RADIO_mail_trash    .Checked) RADIO_mail_trash    .Invoke(new Action(() => RADIO_mail_trash    .Checked = true));
+
+            PIC_loading.Invoke(new Action(() => PIC_loading.Hide()));
         }
 
         #endregion FUNCTIONS
@@ -121,15 +241,28 @@ namespace Email_Service
         {
             InitializeComponent();
 
+            if (!Directory.Exists(PATH_profiles))      Directory.CreateDirectory(PATH_profiles);
+            if (!File     .Exists(PATH_profiles_json)) File     .WriteAllText(PATH_profiles_json, "{}");
+            if (File.ReadAllBytes(PATH_profiles_json).Length > 4)
+            using (FileStream stream = new FileStream(PATH_profiles_json, FileMode.OpenOrCreate))
+            {
+                MENU_ITEM_profile.Items.AddRange(JsonSerializer.Deserialize<Profile[]>(stream));
+            }
+
             imap_client = new ImapClient();
             smtp_client = new SmtpClient();
         }
-        private void FORM_Main_FormClosing(object sender, FormClosingEventArgs e) // ! ->
+        private void FORM_Main_FormClosing(object sender, FormClosingEventArgs e)
         {
             imap_client.Dispose();
             smtp_client.Dispose();
 
-            // +++ Save profiles
+            using (FileStream stream = new FileStream(PATH_profiles_json, FileMode.OpenOrCreate))
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                Profile[] profiles = MENU_ITEM_profile.Items.Cast<Profile>().Where(x => x.Remember).ToArray();
+                JsonSerializer.Serialize(stream, profiles, options);
+            }
         }
 
         private void PIC_avatar_MouseEnter(object sender, EventArgs e)
@@ -143,7 +276,7 @@ namespace Email_Service
 
         private void TIMER_refresher_Tick(object sender, EventArgs e)
         {
-            Refresh_mails();
+            if (refreshing.IsCompleted) refreshing = Task.Run(() => Refresh_mails());
         }
 
         private void BTN_new_chain_Click(object sender, EventArgs e)
@@ -152,20 +285,27 @@ namespace Email_Service
             State_mail_send();
         }
 
-        private void LIST_mails_SelectedIndexChanged(object sender, EventArgs e) // ! =>
+        private void LIST_mails_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (LIST_mails.SelectedItem == null) return;
             cur_mail = LIST_mails.SelectedItem as Mail;
-            TXT_from.Text = cur_mail.from;
-            // +++ Show mail
+            TXT_from .Text = cur_mail.from;
+            TXT_to   .Text = cur_mail.to;
+            TXT_topic.Text = cur_mail.topic;
+            TXT_time .Text = cur_mail.time;
+            TEXT_mail.Text = cur_mail.text_plain + Environment.NewLine;
+            try { TEXT_mail.Rtf += MarkupConverter.HtmlToRtfConverter.ConvertHtmlToRtf(cur_mail.text_html); } catch { }
+            LIST_attached.Items.AddRange(cur_mail.attached.ToArray());
             State_mail_read();
         }
 
         // # MENU profile
 
-        private void MENU_ITEM_profile_SelectedIndexChanged(object sender, EventArgs e)
+        private async void MENU_ITEM_profile_SelectedIndexChanged(object sender, EventArgs e)
         {
             profile = MENU_ITEM_profile.SelectedItem as Profile;
-            if (Connect_clients(profile))
+            Connect_clients(profile);
+            if (connected)
             {
                 BTN_new_chain          .Enabled = true;
                 FLOW_PANEL_mail_folders.Enabled = true;
@@ -173,9 +313,16 @@ namespace Email_Service
                 MENU_ITEM_logout       .Enabled = true;
                 SPLIT_container.Panel2 .Enabled = true;
 
+                if (!Directory         .Exists(PATH_profiles + profile.Email + PATH_attachments))
+                     Directory.CreateDirectory(PATH_profiles + profile.Email + PATH_attachments);
+
+                if (!File      .Exists(PATH_profiles + profile.Email + PATH_storage))
+                     File.WriteAllText(PATH_profiles + profile.Email + PATH_storage, NEW_storage);
+
                 RADIO_mail_all.Checked = true;
                 State_mail_none();
-                Refresh_mails();
+                if (refreshing != null && !refreshing.IsCompleted) { cancel = true; await refreshing; }
+                refreshing = Task.Run(() => Refresh_mails());
             }
             else
             {
@@ -193,7 +340,7 @@ namespace Email_Service
                     bool contains = false;
                     foreach (Profile profile in MENU_ITEM_profile.Items)
                     {
-                        if (profile.email == login.profile.email) contains = true;
+                        if (profile.Email == login.profile.Email) contains = true;
                     }
                     if (contains) return;
 
@@ -205,7 +352,7 @@ namespace Email_Service
 
         private void MENU_ITEM_refresh_Click(object sender, EventArgs e)
         {
-            Refresh_mails();
+            if (refreshing.IsCompleted) refreshing = Task.Run(() => Refresh_mails());
         }
 
         private void MENU_ITEM_logout_Click(object sender, EventArgs e)
@@ -216,66 +363,73 @@ namespace Email_Service
         // # =====
         // # RADIOs mail folders
 
-        private void Refresh_mails() // ! ->
-        {
-            // +++ Get list of all local mails
-
-            var inbox = imap_client.Inbox;
-            inbox.Open(FolderAccess.ReadOnly);
-            foreach (var mail_data in inbox.Fetch(0, -1, MessageSummaryItems.EmailId))
+        private void Get_mails(XElement storage)
+        { // PIC_loading.Invoke(new Action(() => PIC_loading.Hide()));
+            LIST_mails.Items.Clear();
+            foreach (XElement x_mail in storage.Elements("mail"))
             {
-                bool new_mail = true;
-                foreach (Mail mail in LIST_mails.Items)
-                {
-                    if (mail.UID == mail_data.EmailId) new_mail = false;
-                }
-                if (new_mail)
-                {
-                    // +++ Add new local mail to JSON and save attached
-                }
+                List<string> attachments = new List<string>();
+                foreach (XElement attached in x_mail.Elements()) attachments.Add(attached.Name.LocalName);
+
+                Mail mail = new Mail(x_mail.Attribute("UID")       .Value,
+                                     x_mail.Attribute("from")      .Value,
+                                     x_mail.Attribute("to")        .Value,
+                                     x_mail.Attribute("topic")     .Value,
+                                     x_mail.Attribute("time")      .Value,
+                                     x_mail.Attribute("text_plain").Value,
+                                     x_mail.Attribute("text_html") .Value,
+                                     attachments);
+                LIST_mails.Items.Add(mail);
             }
-
-                 if (RADIO_mail_all      .Checked) RADIO_mail_all_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_sent     .Checked) RADIO_mail_sent_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_receive  .Checked) RADIO_mail_receive_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_important.Checked) RADIO_mail_important_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_drafts   .Checked) RADIO_mail_drafts_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_spam     .Checked) RADIO_mail_spam_CheckedChanged(new object(), new EventArgs());
-            else if (RADIO_mail_trash    .Checked) RADIO_mail_trash_CheckedChanged(new object(), new EventArgs());
-        }
-        private void RADIO_mail_all_CheckedChanged(object sender, EventArgs e) // ! ->
-        {
-            // +++ Get list of all local mails at JSON-file with Mail's data
         }
 
-        private void RADIO_mail_sent_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_all_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of sent local mails at JSON-file with Mail's data
+            if (!RADIO_mail_all.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root);
         }
 
-        private void RADIO_mail_receive_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_sent_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of receive local mails at JSON-file with Mail's data
+            if (!RADIO_mail_sent.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("sent"));
         }
 
-        private void RADIO_mail_important_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_receive_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of important local mails at JSON-file with Mail's data
+            if (!RADIO_mail_receive.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("receive"));
         }
 
-        private void RADIO_mail_drafts_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_important_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of draft local mails at JSON-file with Mail's data
+            if (!RADIO_mail_important.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("important"));
         }
 
-        private void RADIO_mail_spam_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_drafts_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of spam local mails at JSON-file with Mail's data
+            if (!RADIO_mail_drafts.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("drafts"));
         }
 
-        private void RADIO_mail_trash_CheckedChanged(object sender, EventArgs e) // ! ->
+        private void RADIO_mail_spam_CheckedChanged(object sender, EventArgs e)
         {
-            // +++ Get list of trash local mails at JSON-file with Mail's data
+            if (!RADIO_mail_spam.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("spam"));
+        }
+
+        private void RADIO_mail_trash_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!RADIO_mail_trash.Checked) return;
+            XDocument storage = XDocument.Load(PATH_profiles + profile.Email + PATH_storage);
+            Get_mails(storage.Root.Element("trash"));
         }
 
         // # =====
@@ -314,14 +468,14 @@ namespace Email_Service
                 }
             }
         }
-        private void BTN_send_Click(object sender, EventArgs e) // ! ->
+        private void BTN_send_Click(object sender, EventArgs e)
         {
             if (BTN_send.Text == "Отправить")
             {
                 if (TXT_to.Text == "") { MessageBox.Show("Укажите получателя"); return; }
 
                 var mail = new MimeMessage();
-                        mail.From.Add(new MailboxAddress(profile.name, profile.email));
+                        mail.From.Add(new MailboxAddress(profile.Name, profile.Email));
                 try   { mail.To  .Add(new MailboxAddress(TXT_to.Text,  TXT_to.Text)); }
                 catch { MessageBox.Show("Ошибка отправки\nПроверьте адрес получателя"); }
                 mail.Subject = TXT_topic.Text;
@@ -333,8 +487,6 @@ namespace Email_Service
                     builder.Attachments.Add((LIST_attached.Items[i] as File_data).full_name);
                 }
                 mail.Body = builder.ToMessageBody();
-
-                // +++ if (TXT_to.ReadOnly) mail.InReplyTo = mail.MessageId;
 
                 try
                 {
@@ -352,14 +504,22 @@ namespace Email_Service
             }
             else // # BTN_send.Text == "Ответить"
             {
-                State_mail_send();
-                if (TXT_to.Text == profile.name || TXT_to.Text == profile.email)
+                if (TXT_to.Text.ToLower().Contains(profile.Email.ToLower()))
                 {
-                    TXT_from.Text = profile.email;
-                    TXT_to  .Text = TXT_from.Text;
+                    int from = TXT_from.Text.IndexOf('<') + 1;
+                    int to   = TXT_from.Text.IndexOf('>');
+                    TXT_to.Text   = from == 0 ? TXT_from.Text : TXT_from.Text.Substring(from, to - from);
                 }
+                else
+                {
+                    int from = TXT_to.Text.IndexOf('<') + 1;
+                    int to   = TXT_to.Text.IndexOf('>');
+                    TXT_to.Text   = from == 0 ? TXT_from.Text : TXT_to.Text.Substring(from, to - from);
+                }
+                State_mail_send();
                 TXT_to   .ReadOnly = true;
                 TXT_topic.ReadOnly = true;
+                TXT_time .Text = "";
                 TEXT_mail.Text = "";
                 LIST_attached.Items.Clear();
             }
@@ -387,21 +547,25 @@ namespace Email_Service
         public string to;
         public string topic;
         public string time;
-        public System.Collections.Generic.List<string> attached;
+        public string text_plain;
+        public string text_html;
+        public List<string> attached;
 
-        public Mail(string _UID, string _from, string _to, string _topic, string _time, System.Collections.Generic.List<string> _attached)
+        public Mail(string _UID, string _from, string _to, string _topic, string _time, string _text_plain, string _text_html, List<string> _attached)
         {
-            UID      = _UID;
-            from     = _from;
-            to       = _to;
-            topic    = _topic;
-            time     = _time;
-            attached = _attached;
+            UID       = _UID;
+            from      = _from;
+            to        = _to;
+            topic     = _topic;
+            time      = _time;
+            text_plain = _text_plain;
+            text_html = _text_html;
+            attached  = _attached;
         }
 
         public override string ToString()
         {
-            return $"   От: {from}\n Кому: {to}\n{topic}\nвремя: {time} -- [приложений: {attached.Count}]";
+            return $"{from} > {to} : {topic} [{time}] {{{attached.Count}}}]";
         }
     }
 

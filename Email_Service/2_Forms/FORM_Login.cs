@@ -17,26 +17,28 @@ namespace Email_Service
 
     public class Profile
     {
-        public string name;
-        public string email;
-        public string password;
-        public bool   remember;
-        public char   server;
+        public string Name     { get; set; }
+        public string Email    { get; set; }
+        public string Password { get; set; }
+        public bool   Remember { get; set; }
+        public char   Server   { get; set; }
 
-        public Profile(string _name, string _email, string _password, bool _remember)
+        public Profile(string Name, string Email, string Password, bool Remember, char Server = 'N')
         {
-            name     = _name;
-            email    = _email;
-            password = _password;
-            remember = _remember;
-                 if (email.EndsWith("@gmail.com")) server = 'G';
-            else if (email.EndsWith("@yandex.ru")) server = 'Y';
-            else                                   server = 'N';
+            this.Name     = Name;
+            this.Email    = Email;
+            this.Password = Password;
+            this.Remember = Remember;
+            if (Server == 'N')
+                     if (Email.EndsWith("@gmail.com")) this.Server = 'G';
+                else if (Email.EndsWith("@yandex.ru")) this.Server = 'Y';
+                else                                   this.Server = 'N';
+            else this.Server = Server;
         }
 
         override public string ToString()
         {
-            return email;
+            return Email;
         }
     }
 }

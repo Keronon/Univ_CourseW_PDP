@@ -127,6 +127,12 @@
   <data name="img_user" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\images\img_user.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="btn_add" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\buttons\btn_add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="img_google" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\images\img_google.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="mail_drafts" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\mails\mail_drafts.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -136,9 +142,6 @@
   <data name="btn_login" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\buttons\btn_login.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="btn_add" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\buttons\btn_add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="btn_update" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\buttons\btn_update.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -147,6 +150,9 @@
   </data>
   <data name="btn_append" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\buttons\btn_append.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="img_yandex" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\images\img_yandex.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="mail_spam" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\mails\mail_spam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -166,10 +172,7 @@
   <data name="btn_logout" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\buttons\btn_logout.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="img_google" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\images\img_google.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="img_yandex" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\images\img_yandex.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="gif_loading" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\images\gif_loading.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
