@@ -57,14 +57,14 @@
     <Reference Include="MailKit, Version=3.4.0.0, Culture=neutral, PublicKeyToken=4e064fe7c44a8f1b, processorArchitecture=MSIL">
       <HintPath>packages\MailKit.3.4.3\lib\net48\MailKit.dll</HintPath>
     </Reference>
-    <Reference Include="MarkupConverter, Version=0.0.0.0, Culture=neutral, PublicKeyToken=275ae570975796c6, processorArchitecture=MSIL">
-      <HintPath>packages\MarkupConverter.1.0.6\lib\net45\MarkupConverter.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="MimeKit, Version=3.4.0.0, Culture=neutral, PublicKeyToken=bede1c8a46c66814, processorArchitecture=MSIL">
       <HintPath>packages\MimeKit.3.4.3\lib\net48\MimeKit.dll</HintPath>
+    </Reference>
+    <Reference Include="RtfPipe, Version=2.0.7677.4303, Culture=neutral, PublicKeyToken=5f6ab4ce530296d2, processorArchitecture=MSIL">
+      <HintPath>packages\RtfPipe.2.0.7677.4303\lib\net45\RtfPipe.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -105,25 +105,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3_Classes\Crypto_module.cs" />
-    <Compile Include="2_Forms\FORM_Login.cs">
+    <Compile Include="_Classes\Crypto_module.cs" />
+    <Compile Include="_Forms\FORM_Login.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="2_Forms\FORM_Login.Designer.cs">
+    <Compile Include="_Forms\FORM_Login.Designer.cs">
       <DependentUpon>FORM_Login.cs</DependentUpon>
     </Compile>
-    <Compile Include="2_Forms\FORM_Main.cs">
+    <Compile Include="_Forms\FORM_Main.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="2_Forms\FORM_Main.Designer.cs">
+    <Compile Include="_Forms\FORM_Main.Designer.cs">
       <DependentUpon>FORM_Main.cs</DependentUpon>
     </Compile>
-    <Compile Include="1_Core\Program.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="2_Forms\FORM_Login.resx">
+    <EmbeddedResource Include="_Forms\FORM_Login.resx">
       <DependentUpon>FORM_Login.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="2_Forms\FORM_Main.resx">
+    <EmbeddedResource Include="_Forms\FORM_Main.resx">
       <DependentUpon>FORM_Main.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -131,7 +131,7 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="1_Core\packages.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -148,9 +148,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="1_Core\App.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\images\img_encrypt.png" />
+    <None Include="Resources\images\img_sign.png" />
     <Content Include="Resources\ToDo.txt" />
     <None Include="Resources\images\gif_loading.gif" />
     <None Include="Resources\images\img_yandex.png" />

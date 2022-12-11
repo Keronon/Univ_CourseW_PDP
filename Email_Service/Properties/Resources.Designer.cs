@@ -153,9 +153,29 @@ namespace Email_Service.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap img_encrypt {
+            get {
+                object obj = ResourceManager.GetObject("img_encrypt", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap img_google {
             get {
                 object obj = ResourceManager.GetObject("img_google", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap img_sign {
+            get {
+                object obj = ResourceManager.GetObject("img_sign", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

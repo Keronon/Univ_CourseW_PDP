@@ -48,6 +48,10 @@
             this.MENU_ITEM_add = new System.Windows.Forms.ToolStripMenuItem();
             this.MENU_ITEM_refresh = new System.Windows.Forms.ToolStripMenuItem();
             this.MENU_ITEM_logout = new System.Windows.Forms.ToolStripMenuItem();
+            this.PIC_signed = new System.Windows.Forms.PictureBox();
+            this.PIC_encrypted = new System.Windows.Forms.PictureBox();
+            this.CHECK_encrypt = new System.Windows.Forms.CheckBox();
+            this.CHECK_sign = new System.Windows.Forms.CheckBox();
             this.TXT_time = new System.Windows.Forms.TextBox();
             this.LBL_time = new System.Windows.Forms.Label();
             this.BTN_send = new System.Windows.Forms.Button();
@@ -69,6 +73,7 @@
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
             this.DIALOG_append = new System.Windows.Forms.OpenFileDialog();
             this.TIMER_refresher = new System.Windows.Forms.Timer(this.components);
+            this.BROWSER_mail = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.SPLIT_container)).BeginInit();
             this.SPLIT_container.Panel1.SuspendLayout();
             this.SPLIT_container.Panel2.SuspendLayout();
@@ -77,6 +82,8 @@
             this.FLOW_PANEL_mail_folders.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).BeginInit();
             this.CONTEXT_MENU_profile.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_signed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_encrypted)).BeginInit();
             this.CONTEXT_MENU_attached.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,6 +106,10 @@
             // 
             // SPLIT_container.Panel2
             // 
+            this.SPLIT_container.Panel2.Controls.Add(this.PIC_signed);
+            this.SPLIT_container.Panel2.Controls.Add(this.PIC_encrypted);
+            this.SPLIT_container.Panel2.Controls.Add(this.CHECK_encrypt);
+            this.SPLIT_container.Panel2.Controls.Add(this.CHECK_sign);
             this.SPLIT_container.Panel2.Controls.Add(this.TXT_time);
             this.SPLIT_container.Panel2.Controls.Add(this.LBL_time);
             this.SPLIT_container.Panel2.Controls.Add(this.BTN_send);
@@ -113,6 +124,7 @@
             this.SPLIT_container.Panel2.Controls.Add(this.TXT_from);
             this.SPLIT_container.Panel2.Controls.Add(this.LBL_from);
             this.SPLIT_container.Panel2.Controls.Add(this.LIST_attached);
+            this.SPLIT_container.Panel2.Controls.Add(this.BROWSER_mail);
             this.SPLIT_container.Panel2.Controls.Add(this.TEXT_mail);
             this.SPLIT_container.Panel2.Enabled = false;
             this.SPLIT_container.Panel2MinSize = 400;
@@ -135,11 +147,14 @@
             // 
             // LIST_mails
             // 
+            this.LIST_mails.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.LIST_mails.FormattingEnabled = true;
+            this.LIST_mails.HorizontalScrollbar = true;
             this.LIST_mails.ItemHeight = 15;
             this.LIST_mails.Location = new System.Drawing.Point(0, 197);
             this.LIST_mails.Name = "LIST_mails";
             this.LIST_mails.Size = new System.Drawing.Size(300, 364);
+            this.LIST_mails.Sorted = true;
             this.LIST_mails.TabIndex = 13;
             this.LIST_mails.SelectedIndexChanged += new System.EventHandler(this.LIST_mails_SelectedIndexChanged);
             // 
@@ -203,7 +218,7 @@
             this.RADIO_mail_receive.Size = new System.Drawing.Size(36, 36);
             this.RADIO_mail_receive.TabIndex = 5;
             this.RADIO_mail_receive.TabStop = true;
-            this.TIP_fast.SetToolTip(this.RADIO_mail_receive, "Принятые");
+            this.TIP_fast.SetToolTip(this.RADIO_mail_receive, "Входящие");
             this.RADIO_mail_receive.UseVisualStyleBackColor = true;
             this.RADIO_mail_receive.CheckedChanged += new System.EventHandler(this.RADIO_mail_receive_CheckedChanged);
             // 
@@ -347,13 +362,57 @@
             this.MENU_ITEM_logout.Text = "Выйти из профиля";
             this.MENU_ITEM_logout.Click += new System.EventHandler(this.MENU_ITEM_logout_Click);
             // 
+            // PIC_signed
+            // 
+            this.PIC_signed.Image = global::Email_Service.Properties.Resources.img_sign;
+            this.PIC_signed.Location = new System.Drawing.Point(512, 121);
+            this.PIC_signed.Name = "PIC_signed";
+            this.PIC_signed.Size = new System.Drawing.Size(30, 30);
+            this.PIC_signed.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PIC_signed.TabIndex = 18;
+            this.PIC_signed.TabStop = false;
+            this.PIC_signed.Visible = false;
+            // 
+            // PIC_encrypted
+            // 
+            this.PIC_encrypted.Image = global::Email_Service.Properties.Resources.img_encrypt;
+            this.PIC_encrypted.Location = new System.Drawing.Point(548, 121);
+            this.PIC_encrypted.Name = "PIC_encrypted";
+            this.PIC_encrypted.Size = new System.Drawing.Size(30, 30);
+            this.PIC_encrypted.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PIC_encrypted.TabIndex = 17;
+            this.PIC_encrypted.TabStop = false;
+            this.PIC_encrypted.Visible = false;
+            // 
+            // CHECK_encrypt
+            // 
+            this.CHECK_encrypt.Appearance = System.Windows.Forms.Appearance.Button;
+            this.CHECK_encrypt.AutoSize = true;
+            this.CHECK_encrypt.Location = new System.Drawing.Point(297, 531);
+            this.CHECK_encrypt.Name = "CHECK_encrypt";
+            this.CHECK_encrypt.Size = new System.Drawing.Size(80, 25);
+            this.CHECK_encrypt.TabIndex = 11;
+            this.CHECK_encrypt.Text = "Шифровать";
+            this.CHECK_encrypt.UseVisualStyleBackColor = true;
+            // 
+            // CHECK_sign
+            // 
+            this.CHECK_sign.Appearance = System.Windows.Forms.Appearance.Button;
+            this.CHECK_sign.AutoSize = true;
+            this.CHECK_sign.Location = new System.Drawing.Point(383, 531);
+            this.CHECK_sign.Name = "CHECK_sign";
+            this.CHECK_sign.Size = new System.Drawing.Size(80, 25);
+            this.CHECK_sign.TabIndex = 12;
+            this.CHECK_sign.Text = "Подписать";
+            this.CHECK_sign.UseVisualStyleBackColor = true;
+            // 
             // TXT_time
             // 
             this.TXT_time.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_time.Location = new System.Drawing.Point(378, 90);
             this.TXT_time.Name = "TXT_time";
             this.TXT_time.ReadOnly = true;
-            this.TXT_time.Size = new System.Drawing.Size(197, 23);
+            this.TXT_time.Size = new System.Drawing.Size(200, 23);
             this.TXT_time.TabIndex = 16;
             // 
             // LBL_time
@@ -432,7 +491,7 @@
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(524, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(527, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -449,7 +508,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(524, 23);
+            this.TXT_to.Size = new System.Drawing.Size(527, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -467,7 +526,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(524, 23);
+            this.TXT_from.Size = new System.Drawing.Size(527, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -514,7 +573,7 @@
             this.TEXT_mail.Font = new System.Drawing.Font("Times New Roman", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(572, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(575, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             this.TEXT_mail.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TEXT_mail_MouseDown);
@@ -541,6 +600,15 @@
             this.TIMER_refresher.Interval = 300000;
             this.TIMER_refresher.Tick += new System.EventHandler(this.TIMER_refresher_Tick);
             // 
+            // BROWSER_mail
+            // 
+            this.BROWSER_mail.Location = new System.Drawing.Point(3, 121);
+            this.BROWSER_mail.MinimumSize = new System.Drawing.Size(20, 20);
+            this.BROWSER_mail.Name = "BROWSER_mail";
+            this.BROWSER_mail.Size = new System.Drawing.Size(575, 288);
+            this.BROWSER_mail.TabIndex = 19;
+            this.BROWSER_mail.Visible = false;
+            // 
             // FORM_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -566,6 +634,8 @@
             this.FLOW_PANEL_mail_folders.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PIC_avatar)).EndInit();
             this.CONTEXT_MENU_profile.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_signed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_encrypted)).EndInit();
             this.CONTEXT_MENU_attached.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -612,6 +682,11 @@
         private System.Windows.Forms.Label LBL_time;
         private System.Windows.Forms.ListBox LIST_mails;
         private System.Windows.Forms.PictureBox PIC_loading;
+        private System.Windows.Forms.PictureBox PIC_encrypted;
+        private System.Windows.Forms.CheckBox CHECK_encrypt;
+        private System.Windows.Forms.CheckBox CHECK_sign;
+        private System.Windows.Forms.PictureBox PIC_signed;
+        private System.Windows.Forms.WebBrowser BROWSER_mail;
     }
 }
 

@@ -1,10 +1,8 @@
 ﻿
 ===== ===== =====
 
-"All" folder not work
-KerononS mails loading too long
+Show attached by Dbl_Click
 
 ===== ===== =====
 
 Encryption
-Add encryption selector to Form
