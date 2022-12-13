@@ -4,8 +4,3 @@
 Show attached by Dbl_Click
 
 ===== ===== =====
-
-Removing accounts
-
-Crypting not work...
-

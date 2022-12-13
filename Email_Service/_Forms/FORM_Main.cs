@@ -11,10 +11,11 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using System.Text;
 using System.Xml.Linq;
 using System.Text.Json;
-using System.Text;
 using System.Security.Cryptography;
+// + ->
 
 namespace Email_Service
 {
@@ -78,6 +79,7 @@ namespace Email_Service
             TXT_time .Text = "";
             TEXT_mail.ReadOnly = true; TEXT_mail.Text = "";
 
+            LIST_mails.Items.Clear();
             RADIO_mail_all    .Checked = RADIO_mail_sent     .Checked =
             RADIO_mail_receive.Checked = RADIO_mail_important.Checked =
             RADIO_mail_drafts .Checked = RADIO_mail_spam     .Checked =
@@ -197,11 +199,11 @@ namespace Email_Service
 
                     List<string> files = new List<string>();
 
-                    string encrypted; int i = 0;
+                    string encrypted;
                     if (mail.Headers[HeaderId.Encrypted] == "T")
                     {
-                        var body = (MimePart)mail.Attachments.ElementAt(0);
-                        string name = mail_data.UniqueId.ToString();
+                        var body = (MimePart)mail.Attachments.Where(x => x.ContentId == "crypt_body").First();
+                        string name = mail.MessageId.Replace('@', '_').Replace('.', '_');
                         try
                         {
                             using (var stream = File.Create(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\" + name))
@@ -211,13 +213,14 @@ namespace Email_Service
                         }
                         catch { }
 
-                        encrypted = "T"; i++;
+                        encrypted = "T";
                     }
                     else encrypted = "F";
 
-                    for ( ; i < mail.Attachments.Count(); i++)
+                    foreach (var attached in mail.Attachments)
                     {
-                        var file = (MimePart)mail.Attachments.ElementAt(i);
+                        if (attached.ContentId == "crypt_body") continue;
+                        var file = (MimePart)attached;
                         string name = file.FileName.Replace(' ', '_').Replace('(', '_').Replace(')', '_').Replace('&', '_').Replace('<', '_').Replace('>', '_');
                         try
                         {
@@ -239,7 +242,7 @@ namespace Email_Service
                                           new XAttribute("encrypted",  encrypted),
                                           new XAttribute("signed",     mail.Headers["signed"] ?? "F")
                                           );
-                    foreach (string file in files) x_mail.Add(new XElement(file));
+                    foreach (string file in files) try { x_mail.Add(new XElement(file)); } catch { return; }
                     if (write_to == null) storage.Add(x_mail);
                     else                  write_to.Add(x_mail);
 
@@ -277,11 +280,11 @@ namespace Email_Service
                             return;
                         }
                     }
-                    else if (mail.Headers["response"] == "declined")
+                    else if (mail.Headers["response"] == "declined" && !mail.From.ToString().Contains(profile.Email))
                     {
                         MessageBox.Show("Запрос был отклонён");
                     }
-                    else if (mail.Headers["response"] != null)
+                    else if (mail.Headers["response"] != null       && !mail.From.ToString().Contains(profile.Email))
                     {
                         string from = mail.From.Mailboxes.First().Address;
                         int index = profile.Keys.FindIndex(x => x.User == from);
@@ -337,6 +340,7 @@ namespace Email_Service
             using (FileStream stream = new FileStream(PATH_profiles_json, FileMode.OpenOrCreate))
             {
                 MENU_ITEM_profile.Items.AddRange(JsonSerializer.Deserialize<Profile[]>(stream));
+                if (MENU_ITEM_profile.Items.Count > 0) MENU_ITEM_profile.SelectedIndex = 0;
             }
 
             imap_client = new ImapClient();
@@ -397,19 +401,23 @@ namespace Email_Service
             {
                 LIST_attached.Items.AddRange(cur_mail.attached.Skip(1).ToArray());
 
-                string body_file = cur_mail.attached.Take(1).First();
+                string body_file = PATH_profiles + profile.Email + PATH_attachments + @"Bodies\" + cur_mail.attached.Take(1).First();
 
-                BROWSER_mail.Document.Write(Encoding.UTF8.GetString(Crypto_module.Decrypt_data(
-                    File.ReadAllBytes(body_file),
-                    profile.Keys.Find(x => (cur_mail.from.Contains(profile.Email) ? cur_mail.to : cur_mail.from).Contains(x.User)).Decrypt_key
-                    )));
+                if (cur_mail.from.Contains(profile.Email))
+                {
+                    BROWSER_mail.Document.Write(cur_mail.text_plain);
+                }
+                else
+                {
+                    string key = profile.Keys.Find(x => (cur_mail.from).Contains(x.User)).Decrypt_key;
+                    BROWSER_mail.Document.Write(Encoding.UTF8.GetString(Crypto_module.Decrypt_data(File.ReadAllBytes(body_file), key)));
+                }
 
                 PIC_encrypted.Show();
             }
             else
             {
                 LIST_attached.Items.AddRange(cur_mail.attached.ToArray());
-                BROWSER_mail.Document.Write(cur_mail.text_plain + "<br/>");
                 BROWSER_mail.Document.Write(cur_mail.text_html);
 
                 PIC_encrypted.Hide();
@@ -430,7 +438,7 @@ namespace Email_Service
             try { Connect_clients(profile); } catch { MessageBox.Show("Не удалось подключиться к почтовым серверам"); }
             if (connected)
             {
-                BTN_new_mail          .Enabled = true;
+                BTN_new_mail           .Enabled = true;
                 FLOW_PANEL_mail_folders.Enabled = true;
                 MENU_ITEM_refresh      .Enabled = true;
                 MENU_ITEM_logout       .Enabled = true;
@@ -443,7 +451,6 @@ namespace Email_Service
                      File.WriteAllText(PATH_profiles + profile.Email + PATH_storage, NEW_storage);
 
                 State_mail_none();
-                RADIO_mail_all.Checked = true;
                 if (refreshing != null && !refreshing.IsCompleted) { cancel = true; await refreshing; cancel = false; }
                 refreshing = Task.Run(() => {
                     PIC_loading.Invoke(new Action(() => PIC_loading.Show()));
@@ -489,6 +496,16 @@ namespace Email_Service
         private void MENU_ITEM_logout_Click(object sender, EventArgs e)
         {
             MENU_ITEM_profile.Items.Remove(MENU_ITEM_profile.SelectedItem);
+            if (MENU_ITEM_profile.Items.Count > 0) MENU_ITEM_profile.SelectedIndex = 0;
+            else
+            {
+                State_mail_none();
+                BTN_new_mail           .Enabled = false;
+                FLOW_PANEL_mail_folders.Enabled = false;
+                MENU_ITEM_refresh      .Enabled = false;
+                MENU_ITEM_logout       .Enabled = false;
+                SPLIT_container.Panel2 .Enabled = false;
+            }
         }
 
         // # =====
@@ -624,7 +641,7 @@ namespace Email_Service
                 if (CHECK_encrypt.Checked)
                 {
                     Keys_Core keys = profile.Keys.Find(x => x.User == TXT_to.Text);
-                    if (keys == null)
+                    if (keys == null || keys.Encrypt_key == null)
                     {
                         if (MessageBox.Show(SEND_request, "Запрос ключей", MessageBoxButtons.OKCancel) == DialogResult.OK)
                         {
@@ -648,12 +665,19 @@ namespace Email_Service
                     mail.Headers.Add(HeaderId.Encrypted, "T");
 
                     byte[] body = Crypto_module.Encrypt_data(Encoding.UTF8.GetBytes(RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf)), keys.Encrypt_key);
-                    builder.Attachments.Add(MimeEntity.Load(new MemoryStream(body)));
+                    var attachmentPart = new MimePart(System.Net.Mime.MediaTypeNames.Text.RichText)
+                    {
+                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        ContentId = "crypt_body",
+                        Content = new MimeContent(new MemoryStream(body))
+                    };
+                    builder.Attachments.Add(attachmentPart);
                     builder.TextBody = "-- encrypted by Email Service created by Keronon --";
 
-                    for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                    foreach (var attached in LIST_attached.Items) // файлы
                     {
-                        File_data file = LIST_attached.Items[i] as File_data;
+                        File_data file = attached as File_data;
                         File.WriteAllBytes(file.short_name, Crypto_module.Encrypt_data(File.ReadAllBytes(file.full_name), keys.Encrypt_key));
                         builder.Attachments.Add(file.short_name);
                         File.Delete(file.short_name);
@@ -663,9 +687,9 @@ namespace Email_Service
                 {
                     builder.HtmlBody = RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf);
 
-                    for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                    foreach (var attached in LIST_attached.Items) // файлы
                     {
-                        builder.Attachments.Add((LIST_attached.Items[i] as File_data).full_name);
+                        builder.Attachments.Add((attached as File_data).full_name);
                     }
                 }
 
