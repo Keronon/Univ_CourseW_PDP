@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 using System.Xml.Linq;
 using System.Text.Json;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace Email_Service
 {
@@ -20,6 +22,9 @@ namespace Email_Service
     {
         #region VARIABLES
 
+        private const string SEND_request       = "У вас нет ключа для отправки шифровок на указанный почтовый адрес\nХотите отправить запрос на получение ключа для шифровок?";
+        private const string RECEIVE_request_1  = "Вам пришёл запрос ключей для отправки шифровок от: ";
+        private const string RECEIVE_request_2  = "\nОтправить данному пользователю ключи для шифровок?";
         private const string PATH_profiles      = @"Profiles\";
         private const string PATH_profiles_json = @"Profiles\profiles.json";
         private const string PATH_attachments   = @"\Mails\Attachments\";
@@ -78,6 +83,8 @@ namespace Email_Service
             RADIO_mail_drafts .Checked = RADIO_mail_spam     .Checked =
             RADIO_mail_trash  .Checked = false;
 
+            CHECK_b.Checked = CHECK_i.Checked = CHECK_u.Checked = false;
+
             LIST_attached.Items.Clear();
             BTN_attach   .Enabled = false; BTN_attach   .Show();
             CHECK_encrypt.Enabled = false; CHECK_encrypt.Show();
@@ -100,8 +107,8 @@ namespace Email_Service
             LBL_time.Hide(); TXT_time.Hide(); BROWSER_mail.Hide();
 
             BTN_attach   .Enabled = true; BTN_attach   .Show();
-            CHECK_encrypt.Enabled = true; CHECK_encrypt.Show();
-            CHECK_sign   .Enabled = true; CHECK_sign   .Show();
+            CHECK_encrypt.Enabled = true; CHECK_encrypt.Show(); CHECK_encrypt.Checked = false;
+            CHECK_sign   .Enabled = true; CHECK_sign   .Show(); CHECK_sign   .Checked = false;
             BTN_send     .Enabled = true; BTN_send.Text = "Отправить";
         }
 
@@ -187,10 +194,30 @@ namespace Email_Service
                 {
                     MimeMessage mail;
                     try { mail = folder.GetMessage(mail_data.UniqueId); } catch { continue; }
+
                     List<string> files = new List<string>();
-                    foreach (var attached in mail.Attachments)
+
+                    string encrypted; int i = 0;
+                    if (mail.Headers[HeaderId.Encrypted] == "T")
                     {
-                        var file = (MimePart)attached;
+                        var body = (MimePart)mail.Attachments.ElementAt(0);
+                        string name = mail_data.UniqueId.ToString();
+                        try
+                        {
+                            using (var stream = File.Create(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\" + name))
+                                body.Content.DecodeTo(stream);
+
+                            files.Add(name);
+                        }
+                        catch { }
+
+                        encrypted = "T"; i++;
+                    }
+                    else encrypted = "F";
+
+                    for ( ; i < mail.Attachments.Count(); i++)
+                    {
+                        var file = (MimePart)mail.Attachments.ElementAt(i);
                         string name = file.FileName.Replace(' ', '_').Replace('(', '_').Replace(')', '_').Replace('&', '_').Replace('<', '_').Replace('>', '_');
                         try
                         {
@@ -208,11 +235,61 @@ namespace Email_Service
                                           new XAttribute("topic",      mail.Subject),
                                           new XAttribute("time",       mail.Date.ToString("g")),
                                           new XAttribute("text_plain", mail.TextBody ?? ""),
-                                          new XAttribute("text_html",  mail.HtmlBody ?? "")
+                                          new XAttribute("text_html",  mail.HtmlBody ?? ""),
+                                          new XAttribute("encrypted",  encrypted),
+                                          new XAttribute("signed",     mail.Headers["signed"] ?? "F")
                                           );
                     foreach (string file in files) x_mail.Add(new XElement(file));
                     if (write_to == null) storage.Add(x_mail);
-                    else                 write_to.Add(x_mail);
+                    else                  write_to.Add(x_mail);
+
+                    if (mail.Headers["request"] == "key" && !mail.From.ToString().Contains(profile.Email))
+                    {
+                        var response = new MimeMessage();
+                        response.From.Add(new MailboxAddress(profile.Name, profile.Email));
+                        string to = mail.From.Mailboxes.First().Address;
+                        response.To.Add(new MailboxAddress(to, to));
+
+                        var builder = new BodyBuilder();
+
+                        string send;
+                        if (MessageBox.Show(RECEIVE_request_1 + mail.From + RECEIVE_request_2, "Запрос ключей", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        {
+                            RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+                            int index = profile.Keys.FindIndex(x => x.User == to);
+                            if (index < 0) profile.Keys.Add(new Keys_Core(to, decrypt_key: RSA.ToXmlString(true)));
+                            else profile.Keys[index].Decrypt_key = RSA.ToXmlString(true);
+                            response.Headers.Add("response", RSA.ToXmlString(false));
+                            send = "ключ";
+                        }
+                        else
+                        {
+                            send = "declined";
+                            response.Headers.Add("response", send);
+                        }
+                        response.Subject = "-- key response --";
+                        builder.TextBody = "-- system mail --";
+                        response.Body = builder.ToMessageBody();
+                        try { smtp_client.Send(response); MessageBox.Show("Отправлен ответ: " + send); }
+                        catch
+                        {
+                            MessageBox.Show("Ошибка отправки\nНичего уже не поделать");
+                            return;
+                        }
+                    }
+                    else if (mail.Headers["response"] == "declined")
+                    {
+                        MessageBox.Show("Запрос был отклонён");
+                    }
+                    else if (mail.Headers["response"] != null)
+                    {
+                        string from = mail.From.Mailboxes.First().Address;
+                        int index = profile.Keys.FindIndex(x => x.User == from);
+                        if (index < 0) profile.Keys.Add(new Keys_Core(from, encrypt_key: mail.Headers["response"]));
+                        else profile.Keys[index].Encrypt_key = mail.Headers["response"];
+
+                        MessageBox.Show("Был получен ключ для шифровок от: " + mail.From);
+                    }
                 }
             }
         }
@@ -298,7 +375,7 @@ namespace Email_Service
             });
         }
 
-        private void BTN_new_chain_Click(object sender, EventArgs e)
+        private void BTN_new_mail_Click(object sender, EventArgs e)
         {
             State_mail_none();
             State_mail_send();
@@ -313,14 +390,35 @@ namespace Email_Service
             TXT_topic.Text = cur_mail.topic;
             TXT_time .Text = cur_mail.time;
 
+            LIST_attached.Items.Clear();
             BROWSER_mail.DocumentText = "0";
             BROWSER_mail.Document.OpenNew(true);
-            BROWSER_mail.Document.Write(cur_mail.text_plain + "<br/>");
-            BROWSER_mail.Document.Write(cur_mail.text_html);
+            if (cur_mail.encrypted == "T")
+            {
+                LIST_attached.Items.AddRange(cur_mail.attached.Skip(1).ToArray());
+
+                string body_file = cur_mail.attached.Take(1).First();
+
+                BROWSER_mail.Document.Write(Encoding.UTF8.GetString(Crypto_module.Decrypt_data(
+                    File.ReadAllBytes(body_file),
+                    profile.Keys.Find(x => (cur_mail.from.Contains(profile.Email) ? cur_mail.to : cur_mail.from).Contains(x.User)).Decrypt_key
+                    )));
+
+                PIC_encrypted.Show();
+            }
+            else
+            {
+                LIST_attached.Items.AddRange(cur_mail.attached.ToArray());
+                BROWSER_mail.Document.Write(cur_mail.text_plain + "<br/>");
+                BROWSER_mail.Document.Write(cur_mail.text_html);
+
+                PIC_encrypted.Hide();
+            }
             BROWSER_mail.Refresh();
 
-            LIST_attached.Items.Clear();
-            LIST_attached.Items.AddRange(cur_mail.attached.ToArray());
+            if (cur_mail.signed == "T") PIC_signed.Show();
+            else                        PIC_signed.Hide();
+
             State_mail_read();
         }
 
@@ -329,17 +427,17 @@ namespace Email_Service
         private async void MENU_ITEM_profile_SelectedIndexChanged(object sender, EventArgs e)
         {
             profile = MENU_ITEM_profile.SelectedItem as Profile;
-            Connect_clients(profile);
+            try { Connect_clients(profile); } catch { MessageBox.Show("Не удалось подключиться к почтовым серверам"); }
             if (connected)
             {
-                BTN_new_chain          .Enabled = true;
+                BTN_new_mail          .Enabled = true;
                 FLOW_PANEL_mail_folders.Enabled = true;
                 MENU_ITEM_refresh      .Enabled = true;
                 MENU_ITEM_logout       .Enabled = true;
                 SPLIT_container.Panel2 .Enabled = true;
 
-                if (!Directory         .Exists(PATH_profiles + profile.Email + PATH_attachments))
-                     Directory.CreateDirectory(PATH_profiles + profile.Email + PATH_attachments);
+                if (!Directory         .Exists(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\"))
+                     Directory.CreateDirectory(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\");
 
                 if (!File      .Exists(PATH_profiles + profile.Email + PATH_storage))
                      File.WriteAllText(PATH_profiles + profile.Email + PATH_storage, NEW_storage);
@@ -410,7 +508,9 @@ namespace Email_Service
                                      x_mail.Attribute("time")      .Value,
                                      x_mail.Attribute("text_plain").Value,
                                      x_mail.Attribute("text_html") .Value,
-                                     attachments);
+                                     attachments,
+                                     x_mail.Attribute("encrypted") .Value,
+                                     x_mail.Attribute("signed")    .Value);
                 LIST_mails.Items.Add(mail);
             }
         }
@@ -521,30 +621,74 @@ namespace Email_Service
                 mail.Subject = TXT_topic.Text;
 
                 var builder = new BodyBuilder();
-                builder.HtmlBody = RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf);
-                for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                if (CHECK_encrypt.Checked)
                 {
-                    builder.Attachments.Add((LIST_attached.Items[i] as File_data).full_name);
-                }
-                mail.Body = builder.ToMessageBody();
+                    Keys_Core keys = profile.Keys.Find(x => x.User == TXT_to.Text);
+                    if (keys == null)
+                    {
+                        if (MessageBox.Show(SEND_request, "Запрос ключей", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        {
+                            mail.Headers.Add("request", "key");
+                            mail.Subject = "-- key request --";
+                            builder.TextBody = "-- system mail --";
+                            mail.Body = builder.ToMessageBody();
+                            try { smtp_client.Send(mail); }
+                            catch
+                            {
+                                MessageBox.Show("Ошибка отправки\nПроверьте адрес получателя\nЕсли ошибку устранить не удаётся\nто ничего уже не поделать");
+                                return;
+                            }
+                            MessageBox.Show("Запрос отправлен");
+                        }
 
-                try
-                {
-                    smtp_client.Send(mail);
+                        CHECK_encrypt.Checked = false;
+                        return;
+                    }
+
+                    mail.Headers.Add(HeaderId.Encrypted, "T");
+
+                    byte[] body = Crypto_module.Encrypt_data(Encoding.UTF8.GetBytes(RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf)), keys.Encrypt_key);
+                    builder.Attachments.Add(MimeEntity.Load(new MemoryStream(body)));
+                    builder.TextBody = "-- encrypted by Email Service created by Keronon --";
+
+                    for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                    {
+                        File_data file = LIST_attached.Items[i] as File_data;
+                        File.WriteAllBytes(file.short_name, Crypto_module.Encrypt_data(File.ReadAllBytes(file.full_name), keys.Encrypt_key));
+                        builder.Attachments.Add(file.short_name);
+                        File.Delete(file.short_name);
+                    }
                 }
+                else
+                {
+                    builder.HtmlBody = RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf);
+
+                    for (int i = 0; i < LIST_attached.Items.Count; i++) // файлы
+                    {
+                        builder.Attachments.Add((LIST_attached.Items[i] as File_data).full_name);
+                    }
+                }
+
+                if (CHECK_sign.Checked)
+                {
+                    mail.Headers.Add("signed", "T");
+                    profile.Signs.Add(mail.MessageId, Crypto_module.Sign_data(Encoding.UTF8.GetBytes(builder.TextBody), profile.Sign_key));
+                }
+
+                mail.Body = builder.ToMessageBody();
+                try { smtp_client.Send(mail); }
                 catch
                 {
                     MessageBox.Show("Ошибка отправки\nПроверьте адрес получателя\nЕсли ошибку устранить не удаётся\nто ничего уже не поделать");
                     return;
                 }
-
                 MessageBox.Show("Сообщение отправлено");
 
                 State_mail_none();
             }
             else // # BTN_send.Text == "Ответить"
             {
-                if (TXT_to.Text.ToLower().Contains(profile.Email.ToLower()))
+                if (TXT_to.Text.Contains(profile.Email))
                 {
                     int from = TXT_from.Text.IndexOf('<') + 1;
                     int to   = TXT_from.Text.IndexOf('>');
@@ -590,17 +734,23 @@ namespace Email_Service
         public string text_plain;
         public string text_html;
         public List<string> attached;
+        public string encrypted;
+        public string signed;
 
-        public Mail(string _UID, string _from, string _to, string _topic, string _time, string _text_plain, string _text_html, List<string> _attached)
+        public Mail(string _UID,        string _from,      string       _to,       string _topic,     string _time,
+                    string _text_plain, string _text_html, List<string> _attached, string _encrypted, string _signed)
         {
-            UID       = _UID;
-            from      = _from;
-            to        = _to;
-            topic     = _topic;
-            time      = _time;
+            UID        = _UID;
+            from       = _from;
+            to         = _to;
+            topic      = _topic;
+            time       = _time;
+
             text_plain = _text_plain;
-            text_html = _text_html;
-            attached  = _attached;
+            text_html  = _text_html;
+            attached   = _attached;
+            encrypted  = _encrypted;
+            signed     = _signed;
         }
 
         public override string ToString()

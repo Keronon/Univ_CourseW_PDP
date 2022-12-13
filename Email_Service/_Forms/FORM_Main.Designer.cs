@@ -41,7 +41,7 @@
             this.RADIO_mail_drafts = new System.Windows.Forms.RadioButton();
             this.RADIO_mail_spam = new System.Windows.Forms.RadioButton();
             this.RADIO_mail_trash = new System.Windows.Forms.RadioButton();
-            this.BTN_new_chain = new System.Windows.Forms.Button();
+            this.BTN_new_mail = new System.Windows.Forms.Button();
             this.PIC_avatar = new System.Windows.Forms.PictureBox();
             this.CONTEXT_MENU_profile = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MENU_ITEM_profile = new System.Windows.Forms.ToolStripComboBox();
@@ -68,12 +68,12 @@
             this.LIST_attached = new System.Windows.Forms.ListBox();
             this.CONTEXT_MENU_attached = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MENU_ITEM_detach = new System.Windows.Forms.ToolStripMenuItem();
+            this.BROWSER_mail = new System.Windows.Forms.WebBrowser();
             this.TEXT_mail = new System.Windows.Forms.RichTextBox();
             this.NOTIFY_ICON = new System.Windows.Forms.NotifyIcon(this.components);
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
             this.DIALOG_append = new System.Windows.Forms.OpenFileDialog();
             this.TIMER_refresher = new System.Windows.Forms.Timer(this.components);
-            this.BROWSER_mail = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.SPLIT_container)).BeginInit();
             this.SPLIT_container.Panel1.SuspendLayout();
             this.SPLIT_container.Panel2.SuspendLayout();
@@ -100,7 +100,7 @@
             this.SPLIT_container.Panel1.Controls.Add(this.PIC_loading);
             this.SPLIT_container.Panel1.Controls.Add(this.LIST_mails);
             this.SPLIT_container.Panel1.Controls.Add(this.FLOW_PANEL_mail_folders);
-            this.SPLIT_container.Panel1.Controls.Add(this.BTN_new_chain);
+            this.SPLIT_container.Panel1.Controls.Add(this.BTN_new_mail);
             this.SPLIT_container.Panel1.Controls.Add(this.PIC_avatar);
             this.SPLIT_container.Panel1MinSize = 200;
             // 
@@ -282,22 +282,22 @@
             this.RADIO_mail_trash.UseVisualStyleBackColor = true;
             this.RADIO_mail_trash.CheckedChanged += new System.EventHandler(this.RADIO_mail_trash_CheckedChanged);
             // 
-            // BTN_new_chain
+            // BTN_new_mail
             // 
-            this.BTN_new_chain.Dock = System.Windows.Forms.DockStyle.Top;
-            this.BTN_new_chain.Enabled = false;
-            this.BTN_new_chain.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.BTN_new_chain.Image = global::Email_Service.Properties.Resources.btn_add;
-            this.BTN_new_chain.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.BTN_new_chain.Location = new System.Drawing.Point(0, 96);
-            this.BTN_new_chain.Name = "BTN_new_chain";
-            this.BTN_new_chain.Size = new System.Drawing.Size(300, 40);
-            this.BTN_new_chain.TabIndex = 2;
-            this.BTN_new_chain.Text = "Новая цепочка писем";
-            this.BTN_new_chain.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.BTN_new_chain.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.BTN_new_chain.UseVisualStyleBackColor = true;
-            this.BTN_new_chain.Click += new System.EventHandler(this.BTN_new_chain_Click);
+            this.BTN_new_mail.Dock = System.Windows.Forms.DockStyle.Top;
+            this.BTN_new_mail.Enabled = false;
+            this.BTN_new_mail.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.BTN_new_mail.Image = global::Email_Service.Properties.Resources.btn_add;
+            this.BTN_new_mail.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.BTN_new_mail.Location = new System.Drawing.Point(0, 96);
+            this.BTN_new_mail.Name = "BTN_new_mail";
+            this.BTN_new_mail.Size = new System.Drawing.Size(300, 40);
+            this.BTN_new_mail.TabIndex = 2;
+            this.BTN_new_mail.Text = "Новое письмо";
+            this.BTN_new_mail.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.BTN_new_mail.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.BTN_new_mail.UseVisualStyleBackColor = true;
+            this.BTN_new_mail.Click += new System.EventHandler(this.BTN_new_mail_Click);
             // 
             // PIC_avatar
             // 
@@ -567,13 +567,22 @@
             this.MENU_ITEM_detach.Text = "Открепить";
             this.MENU_ITEM_detach.Click += new System.EventHandler(this.MENU_ITEM_detach_Click);
             // 
+            // BROWSER_mail
+            // 
+            this.BROWSER_mail.Location = new System.Drawing.Point(3, 121);
+            this.BROWSER_mail.MinimumSize = new System.Drawing.Size(20, 20);
+            this.BROWSER_mail.Name = "BROWSER_mail";
+            this.BROWSER_mail.Size = new System.Drawing.Size(573, 288);
+            this.BROWSER_mail.TabIndex = 19;
+            this.BROWSER_mail.Visible = false;
+            // 
             // TEXT_mail
             // 
             this.TEXT_mail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TEXT_mail.Font = new System.Drawing.Font("Times New Roman", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(575, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(577, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             this.TEXT_mail.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TEXT_mail_MouseDown);
@@ -599,15 +608,6 @@
             // 
             this.TIMER_refresher.Interval = 300000;
             this.TIMER_refresher.Tick += new System.EventHandler(this.TIMER_refresher_Tick);
-            // 
-            // BROWSER_mail
-            // 
-            this.BROWSER_mail.Location = new System.Drawing.Point(3, 121);
-            this.BROWSER_mail.MinimumSize = new System.Drawing.Size(20, 20);
-            this.BROWSER_mail.Name = "BROWSER_mail";
-            this.BROWSER_mail.Size = new System.Drawing.Size(575, 288);
-            this.BROWSER_mail.TabIndex = 19;
-            this.BROWSER_mail.Visible = false;
             // 
             // FORM_Main
             // 
@@ -661,7 +661,7 @@
         private System.Windows.Forms.RadioButton RADIO_mail_drafts;
         private System.Windows.Forms.RadioButton RADIO_mail_important;
         private System.Windows.Forms.RadioButton RADIO_mail_receive;
-        private System.Windows.Forms.Button BTN_new_chain;
+        private System.Windows.Forms.Button BTN_new_mail;
         private System.Windows.Forms.CheckBox CHECK_u;
         private System.Windows.Forms.CheckBox CHECK_i;
         private System.Windows.Forms.CheckBox CHECK_b;
