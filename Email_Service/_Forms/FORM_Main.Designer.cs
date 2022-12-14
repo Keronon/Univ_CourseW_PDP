@@ -74,6 +74,7 @@
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
             this.DIALOG_append = new System.Windows.Forms.OpenFileDialog();
             this.TIMER_refresher = new System.Windows.Forms.Timer(this.components);
+            this.DIALOG_save_file = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.SPLIT_container)).BeginInit();
             this.SPLIT_container.Panel1.SuspendLayout();
             this.SPLIT_container.Panel2.SuspendLayout();
@@ -412,7 +413,7 @@
             this.TXT_time.Location = new System.Drawing.Point(378, 90);
             this.TXT_time.Name = "TXT_time";
             this.TXT_time.ReadOnly = true;
-            this.TXT_time.Size = new System.Drawing.Size(200, 23);
+            this.TXT_time.Size = new System.Drawing.Size(201, 23);
             this.TXT_time.TabIndex = 16;
             // 
             // LBL_time
@@ -491,7 +492,7 @@
             this.TXT_topic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_topic.Location = new System.Drawing.Point(51, 61);
             this.TXT_topic.Name = "TXT_topic";
-            this.TXT_topic.Size = new System.Drawing.Size(527, 23);
+            this.TXT_topic.Size = new System.Drawing.Size(528, 23);
             this.TXT_topic.TabIndex = 8;
             // 
             // LBL_topic
@@ -508,7 +509,7 @@
             this.TXT_to.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TXT_to.Location = new System.Drawing.Point(51, 32);
             this.TXT_to.Name = "TXT_to";
-            this.TXT_to.Size = new System.Drawing.Size(527, 23);
+            this.TXT_to.Size = new System.Drawing.Size(528, 23);
             this.TXT_to.TabIndex = 6;
             // 
             // LBL_to
@@ -526,7 +527,7 @@
             this.TXT_from.Location = new System.Drawing.Point(51, 3);
             this.TXT_from.Name = "TXT_from";
             this.TXT_from.ReadOnly = true;
-            this.TXT_from.Size = new System.Drawing.Size(527, 23);
+            this.TXT_from.Size = new System.Drawing.Size(528, 23);
             this.TXT_from.TabIndex = 4;
             // 
             // LBL_from
@@ -582,7 +583,7 @@
             this.TEXT_mail.Font = new System.Drawing.Font("Times New Roman", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TEXT_mail.Location = new System.Drawing.Point(3, 121);
             this.TEXT_mail.Name = "TEXT_mail";
-            this.TEXT_mail.Size = new System.Drawing.Size(577, 288);
+            this.TEXT_mail.Size = new System.Drawing.Size(578, 288);
             this.TEXT_mail.TabIndex = 0;
             this.TEXT_mail.Text = "";
             this.TEXT_mail.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TEXT_mail_MouseDown);
@@ -608,6 +609,10 @@
             // 
             this.TIMER_refresher.Interval = 300000;
             this.TIMER_refresher.Tick += new System.EventHandler(this.TIMER_refresher_Tick);
+            // 
+            // DIALOG_save_file
+            // 
+            this.DIALOG_save_file.InitialDirectory = "D:\\";
             // 
             // FORM_Main
             // 
@@ -687,6 +692,7 @@
         private System.Windows.Forms.CheckBox CHECK_sign;
         private System.Windows.Forms.PictureBox PIC_signed;
         private System.Windows.Forms.WebBrowser BROWSER_mail;
+        private System.Windows.Forms.SaveFileDialog DIALOG_save_file;
     }
 }
 

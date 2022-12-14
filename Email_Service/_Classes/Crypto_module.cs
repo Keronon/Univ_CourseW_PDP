@@ -117,14 +117,14 @@ namespace Email_Service
         /// Checks data that signed by MD5-RSA-signification
         /// </summary>
         /// <param name="to_check">data to be checked</param>
-        /// <param name="sign_key">private key for RSA that signed data-hash</param>
+        /// <param name="check_key">public key for RSA that signed data-hash</param>
         /// <param name="sign">data-sign</param>
         /// <returns></returns>
-        public static bool Check_data(byte[] to_check, string sign_key, byte[] sign)
+        public static bool Check_data(byte[] to_check, string check_key, byte[] sign)
         {
             using (var rsa = new RSACryptoServiceProvider(256))
             {
-                rsa.FromXmlString(sign_key);
+                rsa.FromXmlString(check_key);
                 return rsa.VerifyData(to_check, MD5.Create(), sign);
             }
         }

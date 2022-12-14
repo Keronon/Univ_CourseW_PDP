@@ -1,6 +1,6 @@
 ﻿
 ===== ===== =====
 
-Show attached by Dbl_Click
+-- nothing to do --
 
 ===== ===== =====

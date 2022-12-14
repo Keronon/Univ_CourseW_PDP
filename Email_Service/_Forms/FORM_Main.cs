@@ -15,7 +15,6 @@ using System.Text;
 using System.Xml.Linq;
 using System.Text.Json;
 using System.Security.Cryptography;
-// + ->
 
 namespace Email_Service
 {
@@ -26,6 +25,7 @@ namespace Email_Service
         private const string SEND_request       = "У вас нет ключа для отправки шифровок на указанный почтовый адрес\nХотите отправить запрос на получение ключа для шифровок?";
         private const string RECEIVE_request_1  = "Вам пришёл запрос ключей для отправки шифровок от: ";
         private const string RECEIVE_request_2  = "\nОтправить данному пользователю ключи для шифровок?";
+        private const string SAVE_exception     = "Это сообщение было зашифровано вами для другого человека\nСохранение файлов из сообщения в читаемом виде невозможно";
         private const string PATH_profiles      = @"Profiles\";
         private const string PATH_profiles_json = @"Profiles\profiles.json";
         private const string PATH_attachments   = @"\Mails\Attachments\";
@@ -199,27 +199,131 @@ namespace Email_Service
 
                     List<string> files = new List<string>();
 
-                    string encrypted;
+                    string html = mail.HtmlBody ?? "";
+                    string encrypted = "F";
+                    string signed = "F";
+                    bool corrupted = false;
                     if (mail.Headers[HeaderId.Encrypted] == "T")
                     {
+                        encrypted = "T";
+
                         var body = (MimePart)mail.Attachments.Where(x => x.ContentId == "crypt_body").First();
-                        string name = mail.MessageId.Replace('@', '_').Replace('.', '_');
+                        byte[] body_bytes = null;
                         try
                         {
-                            using (var stream = File.Create(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\" + name))
+                            using (var stream = new MemoryStream())
+                            {
                                 body.Content.DecodeTo(stream);
-
-                            files.Add(name);
+                                body_bytes = stream.ToArray();
+                            }
                         }
-                        catch { }
+                        catch { return; }
 
-                        encrypted = "T";
+                        if (mail.Headers["signed"] == "T")
+                        {
+                            signed = "T";
+
+                            var sign_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign").First();
+                            byte[] sign;
+                            try
+                            {
+                                using (var stream = new MemoryStream())
+                                {
+                                    sign_part.Content.DecodeTo(stream);
+                                    sign = stream.ToArray();
+                                }
+                            }catch { return; }
+
+                            var sign_key_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign_key").First();
+                            string sign_key;
+                            try
+                            {
+                                using (var stream = new MemoryStream())
+                                {
+                                    sign_key_part.Content.DecodeTo(stream);
+                                    sign_key = Encoding.UTF8.GetString(stream.ToArray());
+                                }
+                            } catch { return; }
+
+                            if (!Crypto_module.Check_data(body_bytes, sign_key, sign))
+                            {
+                                MessageBox.Show($@"Signed corrupted mail
+From:  {mail.From}
+To:    {mail.To}
+About: {mail.Subject}
+At:    {mail.Date.ToString("g")}
+Was detected and undeployed");
+
+                                corrupted = true;
+                                encrypted = "F";
+                                html = "-- this mail was corrupted and undeployed --";
+                            }
+                        }
+
+                        if (!corrupted)
+                        {
+                            string name = mail.MessageId.Replace('@', '_').Replace('.', '_');
+                            try
+                            {
+                                using (var stream = File.Create(PATH_profiles + profile.Email + PATH_attachments + @"Bodies\" + name))
+                                    stream.Write(body_bytes, 0, body_bytes.Length);
+
+                                files.Add(name);
+                            }
+                            catch { }
+                        }
                     }
-                    else encrypted = "F";
+                    else
+                    {
+                        if (mail.Headers["signed"] == "T")
+                        {
+                            signed = "T";
 
+                            var sign_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign").First();
+                            byte[] sign;
+                            try
+                            {
+                                using (var stream = new MemoryStream())
+                                {
+                                    sign_part.Content.DecodeTo(stream);
+                                    sign = stream.ToArray();
+                                }
+                            }
+                            catch { return; }
+
+                            var sign_key_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign_key").First();
+                            string sign_key;
+                            try
+                            {
+                                using (var stream = new MemoryStream())
+                                {
+                                    sign_key_part.Content.DecodeTo(stream);
+                                    sign_key = Encoding.UTF8.GetString(stream.ToArray());
+                                }
+                            }
+                            catch { return; }
+
+                            if (!Crypto_module.Check_data(Encoding.UTF8.GetBytes(html), sign_key, sign))
+                            {
+                                MessageBox.Show($@"Signed corrupted mail
+From:  {mail.From}
+To:    {mail.To}
+About: {mail.Subject}
+At:    {mail.Date.ToString("g")}
+Was detected and undeployed");
+
+                                corrupted = true;
+                                html = "-- this mail was corrupted and undeployed --";
+                            }
+                        }
+                    }
+
+                    if (!corrupted)
                     foreach (var attached in mail.Attachments)
                     {
-                        if (attached.ContentId == "crypt_body") continue;
+                        if (attached.ContentId == "crypt_body" ||
+                            attached.ContentId == "sign"       ||
+                            attached.ContentId == "sign_key") continue;
                         var file = (MimePart)attached;
                         string name = file.FileName.Replace(' ', '_').Replace('(', '_').Replace(')', '_').Replace('&', '_').Replace('<', '_').Replace('>', '_');
                         try
@@ -238,9 +342,9 @@ namespace Email_Service
                                           new XAttribute("topic",      mail.Subject),
                                           new XAttribute("time",       mail.Date.ToString("g")),
                                           new XAttribute("text_plain", mail.TextBody ?? ""),
-                                          new XAttribute("text_html",  mail.HtmlBody ?? ""),
+                                          new XAttribute("text_html",  html),
                                           new XAttribute("encrypted",  encrypted),
-                                          new XAttribute("signed",     mail.Headers["signed"] ?? "F")
+                                          new XAttribute("signed",     signed)
                                           );
                     foreach (string file in files) try { x_mail.Add(new XElement(file)); } catch { return; }
                     if (write_to == null) storage.Add(x_mail);
@@ -256,7 +360,8 @@ namespace Email_Service
                         var builder = new BodyBuilder();
 
                         string send;
-                        if (MessageBox.Show(RECEIVE_request_1 + mail.From + RECEIVE_request_2, "Запрос ключей", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        if (MessageBox.Show(RECEIVE_request_1 + mail.From + RECEIVE_request_2, "Запрос ключей", MessageBoxButtons.YesNo)
+                            == DialogResult.Yes)
                         {
                             RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
                             int index = profile.Keys.FindIndex(x => x.User == to);
@@ -334,6 +439,9 @@ namespace Email_Service
         {
             InitializeComponent();
 
+            imap_client = new ImapClient();
+            smtp_client = new SmtpClient();
+
             if (!Directory.Exists(PATH_profiles))      Directory.CreateDirectory(PATH_profiles);
             if (!File     .Exists(PATH_profiles_json)) File     .WriteAllText(PATH_profiles_json, "{}");
             if (File.ReadAllBytes(PATH_profiles_json).Length > 4)
@@ -342,9 +450,6 @@ namespace Email_Service
                 MENU_ITEM_profile.Items.AddRange(JsonSerializer.Deserialize<Profile[]>(stream));
                 if (MENU_ITEM_profile.Items.Count > 0) MENU_ITEM_profile.SelectedIndex = 0;
             }
-
-            imap_client = new ImapClient();
-            smtp_client = new SmtpClient();
         }
         private async void FORM_Main_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -643,7 +748,7 @@ namespace Email_Service
                     Keys_Core keys = profile.Keys.Find(x => x.User == TXT_to.Text);
                     if (keys == null || keys.Encrypt_key == null)
                     {
-                        if (MessageBox.Show(SEND_request, "Запрос ключей", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        if (MessageBox.Show(SEND_request, "Запрос ключей", MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
                             mail.Headers.Add("request", "key");
                             mail.Subject = "-- key request --";
@@ -663,16 +768,39 @@ namespace Email_Service
                     }
 
                     mail.Headers.Add(HeaderId.Encrypted, "T");
-
                     byte[] body = Crypto_module.Encrypt_data(Encoding.UTF8.GetBytes(RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf)), keys.Encrypt_key);
-                    var attachmentPart = new MimePart(System.Net.Mime.MediaTypeNames.Text.RichText)
+
+                    if (CHECK_sign.Checked)
+                    {
+                        mail.Headers.Add("signed", "T");
+                        profile.Signs.Add(mail.MessageId, Crypto_module.Sign_data(body, profile.Sign_keys.Item1));
+
+                        var sign_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
+                        {
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            ContentId = "sign",
+                            Content = new MimeContent(new MemoryStream(profile.Signs[mail.MessageId]))
+                        };
+                        builder.Attachments.Add(sign_part);
+                        var sign_key_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
+                        {
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            ContentId = "sign_key",
+                            Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(profile.Sign_keys.Item2)))
+                        };
+                        builder.Attachments.Add(sign_key_part);
+                    }
+
+                    var body_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                     {
                         ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         ContentId = "crypt_body",
                         Content = new MimeContent(new MemoryStream(body))
                     };
-                    builder.Attachments.Add(attachmentPart);
+                    builder.Attachments.Add(body_part);
                     builder.TextBody = "-- encrypted by Email Service created by Keronon --";
 
                     foreach (var attached in LIST_attached.Items) // файлы
@@ -685,18 +813,37 @@ namespace Email_Service
                 }
                 else
                 {
-                    builder.HtmlBody = RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf);
+                    string body = RtfPipe.Rtf.ToHtml(TEXT_mail.Rtf);
+
+                    if (CHECK_sign.Checked)
+                    {
+                        mail.Headers.Add("signed", "T");
+                        profile.Signs.Add(mail.MessageId, Crypto_module.Sign_data(Encoding.UTF8.GetBytes(body), profile.Sign_keys.Item1));
+
+                        var sign_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
+                        {
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            ContentId = "sign",
+                            Content = new MimeContent(new MemoryStream(profile.Signs[mail.MessageId]))
+                        };
+                        builder.Attachments.Add(sign_part);
+                        var sign_key_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
+                        {
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            ContentId = "sign_key",
+                            Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(profile.Sign_keys.Item2)))
+                        };
+                        builder.Attachments.Add(sign_key_part);
+                    }
+
+                    builder.HtmlBody = body;
 
                     foreach (var attached in LIST_attached.Items) // файлы
                     {
                         builder.Attachments.Add((attached as File_data).full_name);
                     }
-                }
-
-                if (CHECK_sign.Checked)
-                {
-                    mail.Headers.Add("signed", "T");
-                    profile.Signs.Add(mail.MessageId, Crypto_module.Sign_data(Encoding.UTF8.GetBytes(builder.TextBody), profile.Sign_key));
                 }
 
                 mail.Body = builder.ToMessageBody();
@@ -733,9 +880,28 @@ namespace Email_Service
             }
         }
 
-        private void LIST_attached_DoubleClick(object sender, EventArgs e) // ! =>
+        private void LIST_attached_DoubleClick(object sender, EventArgs e)
         {
-            // +++ Show file
+            if (MessageBox.Show("Вы хотите сохранить выбранный файл\nотдельно на компьютер в читаемом виде?", "Сохранить файл", MessageBoxButtons.YesNo)
+                == DialogResult.Yes)
+            {
+                string attached = LIST_attached.SelectedItems[0] as string;
+                File_data file = new File_data(PATH_profiles + profile.Email + PATH_attachments + attached, attached);
+                DIALOG_save_file.Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
+
+                if (cur_mail.encrypted == "T")
+                {
+                    if (cur_mail.from.Contains(profile.Email)) MessageBox.Show(SAVE_exception);
+                    else
+                    if (DIALOG_save_file.ShowDialog() == DialogResult.OK)
+                    {
+                        string key = profile.Keys.Find(x => (cur_mail.from).Contains(x.User)).Decrypt_key;
+                        File.WriteAllBytes(DIALOG_save_file.FileName, Crypto_module.Decrypt_data(File.ReadAllBytes(file.full_name), key));
+
+                        MessageBox.Show("Сохранено");
+                    }
+                }
+            }
         }
         private void MENU_ITEM_detach_Click(object sender, EventArgs e)
         {
