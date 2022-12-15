@@ -207,7 +207,7 @@ namespace Email_Service
                     {
                         encrypted = "T";
 
-                        var body = (MimePart)mail.Attachments.Where(x => x.ContentId == "crypt_body").First();
+                        var body = (MimePart)mail.BodyParts.Where(x => x.ContentId == "crypt_body").First();
                         byte[] body_bytes = null;
                         try
                         {
@@ -223,7 +223,7 @@ namespace Email_Service
                         {
                             signed = "T";
 
-                            var sign_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign").First();
+                            var sign_part = (MimePart)mail.BodyParts.Where(x => x.ContentId == "sign").First();
                             byte[] sign;
                             try
                             {
@@ -234,7 +234,7 @@ namespace Email_Service
                                 }
                             }catch { return; }
 
-                            var sign_key_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign_key").First();
+                            var sign_key_part = (MimePart)mail.BodyParts.Where(x => x.ContentId == "sign_key").First();
                             string sign_key;
                             try
                             {
@@ -279,7 +279,7 @@ Was detected and undeployed");
                         {
                             signed = "T";
 
-                            var sign_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign").First();
+                            var sign_part = (MimePart)mail.BodyParts.Where(x => x.ContentId == "sign").First();
                             byte[] sign;
                             try
                             {
@@ -291,7 +291,7 @@ Was detected and undeployed");
                             }
                             catch { return; }
 
-                            var sign_key_part = (MimePart)mail.Attachments.Where(x => x.ContentId == "sign_key").First();
+                            var sign_key_part = (MimePart)mail.BodyParts.Where(x => x.ContentId == "sign_key").First();
                             string sign_key;
                             try
                             {
@@ -321,9 +321,6 @@ Was detected and undeployed");
                     if (!corrupted)
                     foreach (var attached in mail.Attachments)
                     {
-                        if (attached.ContentId == "crypt_body" ||
-                            attached.ContentId == "sign"       ||
-                            attached.ContentId == "sign_key") continue;
                         var file = (MimePart)attached;
                         string name = file.FileName.Replace(' ', '_').Replace('(', '_').Replace(')', '_').Replace('&', '_').Replace('<', '_').Replace('>', '_');
                         try
@@ -777,7 +774,6 @@ Was detected and undeployed");
 
                         var sign_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                         {
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             ContentId = "sign",
                             Content = new MimeContent(new MemoryStream(profile.Signs[mail.MessageId]))
@@ -785,7 +781,6 @@ Was detected and undeployed");
                         builder.Attachments.Add(sign_part);
                         var sign_key_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                         {
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             ContentId = "sign_key",
                             Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(profile.Sign_keys.Item2)))
@@ -795,7 +790,6 @@ Was detected and undeployed");
 
                     var body_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                     {
-                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         ContentId = "crypt_body",
                         Content = new MimeContent(new MemoryStream(body))
@@ -822,7 +816,6 @@ Was detected and undeployed");
 
                         var sign_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                         {
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             ContentId = "sign",
                             Content = new MimeContent(new MemoryStream(profile.Signs[mail.MessageId]))
@@ -830,7 +823,6 @@ Was detected and undeployed");
                         builder.Attachments.Add(sign_part);
                         var sign_key_part = new MimePart(System.Net.Mime.MediaTypeNames.Application.Octet)
                         {
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             ContentId = "sign_key",
                             Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(profile.Sign_keys.Item2)))
