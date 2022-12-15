@@ -871,7 +871,9 @@ Was detected and undeployed");
                     int to   = TXT_to.Text.IndexOf('>');
                     TXT_to.Text   = from == 0 ? TXT_from.Text : TXT_to.Text.Substring(from, to - from);
                 }
+
                 State_mail_send();
+                PIC_encrypted.Hide(); PIC_signed.Hide();
                 TXT_to   .ReadOnly = true;
                 TXT_topic.ReadOnly = true;
                 TXT_time .Text = "";
