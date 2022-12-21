@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Xml.Linq;
 using System.Text.Json;
-using System.Security.Cryptography;
 
 namespace Email_Service
 {
@@ -360,17 +359,17 @@ Was detected and undeployed");
                         if (MessageBox.Show(RECEIVE_request_1 + mail.From + RECEIVE_request_2, "Запрос ключей", MessageBoxButtons.YesNo)
                             == DialogResult.Yes)
                         {
-                            RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+                            Tuple<string, string> keys = Crypto_module.Get_new_keys_pair();
                             int index = profile.Keys.FindIndex(x => x.User == to);
-                            if (index < 0) profile.Keys.Add(new Keys_Core(to, decrypt_key: RSA.ToXmlString(true)));
-                            else profile.Keys[index].Decrypt_key = RSA.ToXmlString(true);
-                            response.Headers.Add("response", RSA.ToXmlString(false));
+                            if (index < 0) profile.Keys.Add(new Keys_Core(to, decrypt_key: keys.Item1));
+                            else profile.Keys[index].Decrypt_key = keys.Item1;
+                            response.Headers.Add("response", keys.Item2);
                             send = "ключ";
                         }
                         else
                         {
-                            send = "declined";
-                            response.Headers.Add("response", send);
+                            send = "отклонено";
+                            response.Headers.Add("response", "declined");
                         }
                         response.Subject = "-- key response --";
                         builder.TextBody = "-- system mail --";
@@ -899,66 +898,20 @@ Was detected and undeployed");
         }
         private void MENU_ITEM_detach_Click(object sender, EventArgs e)
         {
+            if (BTN_send.Text == "Ответить")
+            {
+                MessageBox.Show("От входящих сообщений невозможно открепить приложения");
+                return;
+            }
             if (LIST_attached.SelectedItem == null)
+            {
                 MessageBox.Show("Выберите файлы чтобы открепить");
+                return;
+            }
             while (LIST_attached.SelectedItems.Count > 0)
                 LIST_attached.Items.Remove(LIST_attached.SelectedItems[0]);
         }
 
         #endregion FORM
-    }
-
-    public class Mail
-    {
-        public string UID;
-        public string from;
-        public string to;
-        public string topic;
-        public string time;
-        public string text_plain;
-        public string text_html;
-        public List<string> attached;
-        public string encrypted;
-        public string signed;
-
-        public Mail(string _UID,        string _from,      string       _to,       string _topic,     string _time,
-                    string _text_plain, string _text_html, List<string> _attached, string _encrypted, string _signed)
-        {
-            UID        = _UID;
-            from       = _from;
-            to         = _to;
-            topic      = _topic;
-            time       = _time;
-
-            text_plain = _text_plain;
-            text_html  = _text_html;
-            attached   = _attached;
-            encrypted  = _encrypted;
-            signed     = _signed;
-        }
-
-        public override string ToString()
-        {
-            return $"{from} > {to} : {topic} [{time}] {{{attached.Count}}}]";
-        }
-    }
-
-    public class File_data
-    {
-        public string full_name;
-        public string short_name;
-        public string extention;
-
-        public File_data(string _full_name, string _short_name)
-        {
-            full_name  = _full_name;
-            short_name = _short_name;
-            extention  = short_name.Substring(short_name.LastIndexOf('.') + 1);
-        }
-
-        public override string ToString()
-        {
-            return short_name;
-        }
     }
 }

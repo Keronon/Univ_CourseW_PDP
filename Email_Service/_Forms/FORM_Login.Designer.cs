@@ -35,10 +35,10 @@
             this.TXT_email = new System.Windows.Forms.TextBox();
             this.TIP_fast = new System.Windows.Forms.ToolTip(this.components);
             this.TXT_password = new System.Windows.Forms.TextBox();
-            this.CHECK_remember = new System.Windows.Forms.CheckBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TXT_name = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.CHECK_remember = new System.Windows.Forms.CheckBox();
+            this.PIC_profile = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_profile)).BeginInit();
             this.SuspendLayout();
             // 
             // BTN_ok
@@ -88,6 +88,14 @@
             this.TXT_password.TabIndex = 5;
             this.TIP_fast.SetToolTip(this.TXT_password, "Пароль");
             // 
+            // TXT_name
+            // 
+            this.TXT_name.Location = new System.Drawing.Point(12, 118);
+            this.TXT_name.Name = "TXT_name";
+            this.TXT_name.Size = new System.Drawing.Size(206, 23);
+            this.TXT_name.TabIndex = 8;
+            this.TIP_fast.SetToolTip(this.TXT_name, "Ник для подписи");
+            // 
             // CHECK_remember
             // 
             this.CHECK_remember.AutoSize = true;
@@ -98,23 +106,15 @@
             this.CHECK_remember.Text = "Запомнить профиль";
             this.CHECK_remember.UseVisualStyleBackColor = true;
             // 
-            // pictureBox1
+            // PIC_profile
             // 
-            this.pictureBox1.Image = global::Email_Service.Properties.Resources.img_user;
-            this.pictureBox1.Location = new System.Drawing.Point(65, 12);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 7;
-            this.pictureBox1.TabStop = false;
-            // 
-            // TXT_name
-            // 
-            this.TXT_name.Location = new System.Drawing.Point(12, 118);
-            this.TXT_name.Name = "TXT_name";
-            this.TXT_name.Size = new System.Drawing.Size(206, 23);
-            this.TXT_name.TabIndex = 8;
-            this.TIP_fast.SetToolTip(this.TXT_name, "Ник для подписи");
+            this.PIC_profile.Image = global::Email_Service.Properties.Resources.img_user;
+            this.PIC_profile.Location = new System.Drawing.Point(65, 12);
+            this.PIC_profile.Name = "PIC_profile";
+            this.PIC_profile.Size = new System.Drawing.Size(100, 100);
+            this.PIC_profile.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PIC_profile.TabIndex = 7;
+            this.PIC_profile.TabStop = false;
             // 
             // FORM_Login
             // 
@@ -123,7 +123,7 @@
             this.ClientSize = new System.Drawing.Size(230, 272);
             this.ControlBox = false;
             this.Controls.Add(this.TXT_name);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.PIC_profile);
             this.Controls.Add(this.CHECK_remember);
             this.Controls.Add(this.TXT_password);
             this.Controls.Add(this.TXT_email);
@@ -139,7 +139,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Вход в профиль";
             this.TopMost = true;
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PIC_profile)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -153,7 +153,7 @@
         private System.Windows.Forms.ToolTip TIP_fast;
         private System.Windows.Forms.TextBox TXT_password;
         private System.Windows.Forms.CheckBox CHECK_remember;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox PIC_profile;
         private System.Windows.Forms.TextBox TXT_name;
     }
 }

@@ -1,6 +1,8 @@
 ﻿
 ===== ===== =====
 
--- nothing to do --
+mix functions of DBL_click to attached and Click to menu_item_detach
+
+optimize FORM_Main functions
 
 ===== ===== =====

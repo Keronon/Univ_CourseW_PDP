@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text.Json;
 
 namespace Email_Service
 {
     internal class Crypto_module
     {
-        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
         /*
         Симметричный алгоритм шифрования – AES.
@@ -21,13 +17,14 @@ namespace Email_Service
         KeySize = 256, BlockSize = 128, Mode = CipherMode.CBC
         */
 
-        private Keys_Core Get_core(Keys_Core[] cores, string name)
+        /// <summary>
+        /// Creates and return new RSA keys pair, formed like Xml strings
+        /// </summary>
+        /// <returns>Tuple of keys: 1st - private, 2nd - public</returns>
+        public static Tuple<string, string> Get_new_keys_pair()
         {
-            foreach (Keys_Core core_crypt in cores)
-            {
-                if (core_crypt.User == name) return core_crypt;
-            }
-            return null;
+            RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+            return new Tuple<string, string>(RSA.ToXmlString(true), RSA.ToXmlString(false));
         }
 
         /// <summary>
@@ -47,7 +44,7 @@ namespace Email_Service
                 byte[] lengthBytes = BitConverter.GetBytes(encryptedAesKey.Length);
                 output.Write(lengthBytes, 0, lengthBytes.Length);
                 output.Write(encryptedAesKey, 0, encryptedAesKey.Length);
-                using (var cs = new CryptoStream(output, aes.CreateEncryptor(), CryptoStreamMode.Write)) input.CopyTo(cs);
+                using (var crypto = new CryptoStream(output, aes.CreateEncryptor(), CryptoStreamMode.Write)) input.CopyTo(crypto);
 
                 return output.ToArray();
             }
@@ -79,7 +76,8 @@ namespace Email_Service
             }
         }
 
-        public static byte[] RSA_encrypt(byte[] data, string encrypt_key)
+        // RSA data encryption
+        private static byte[] RSA_encrypt(byte[] data, string encrypt_key)
         {
             using (var rsa = new RSACryptoServiceProvider())
             {
@@ -88,7 +86,8 @@ namespace Email_Service
             }
         }
 
-        public static byte[] RSA_decrypt(byte[] data, string decrypt_key)
+        // RSA data decryption
+        private static byte[] RSA_decrypt(byte[] data, string decrypt_key)
         {
             using (var rsa = new RSACryptoServiceProvider())
             {
